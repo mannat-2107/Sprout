@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sprout App - First-Time Mobile Investing in India</title>
+  <meta name="description" content="Sprout Mobile Onboarding App. Fast paperless KYC and instant micro-SIP setup starting at ₹10/day.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/onboarding.css">
+
+  <style>
+    /* Dedicated App Shell Layout */
+    body {
+      background-color: #F0F4F1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .app-standalone-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 8px 48px;
+    }
+    .app-top-nav-bar {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 0 4px;
+    }
+    .app-back-to-site {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #155A37;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      background: #FFFFFF;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+    }
+    .app-back-to-site:hover {
+      background: #EBF5EE;
+    }
+
+    /* Telemetry drawer */
+    .telemetry-inspector {
+      position: fixed;
+      bottom: 48px;
+      right: 16px;
+      width: 320px;
+      max-height: 280px;
+      background: #0E281C;
+      color: #E2E8F0;
+      border: 1px solid #2E8B57;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-lg);
+      z-index: 1000;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease;
+    }
+    .telemetry-inspector.is-collapsed {
+      transform: translateY(calc(100% - 32px));
+    }
+    .telemetry-header {
+      padding: 6px 10px;
+      background: #155A37;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    .telemetry-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      font-family: monospace;
+      max-height: 230px;
+    }
+    .telemetry-item {
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .telemetry-time {
+      color: #94A3B8;
+      margin-right: 4px;
+    }
+    .telemetry-item code {
+      display: block;
+      color: #86EFAC;
+      font-size: 10px;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="app-standalone-container">
+    <!-- Top Bar with Return to Website Link & Language Switcher -->
+    <div class="app-top-nav-bar">
+      <a href="index.html" class="app-back-to-site" title="Return to Sprout marketing website">
+        ← Back to Website
+      </a>
+      <div class="lang-toggle">
+        <button class="lang-btn is-active" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="hi">हिंदी</button>
+      </div>
+    </div>
+
+    <!-- Phone Mockup Frame (Realistic sub-₹10,000 mobile aspect) -->
+    <div class="phone-mockup-frame">
+      <!-- System Status Bar -->
+      <div class="phone-status-bar">
+        <span>09:41</span>
+        <span>4G · VoLTE · 88%</span>
+      </div>
+
+      <!-- App Header with AMFI Registration Indicator -->
+      <header class="phone-app-header">
+        <a href="index.html" class="phone-back-btn" aria-label="Exit to website">
+          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </a>
+        <!-- COMPLIANCE: Replace [ARN-PLACEHOLDER] with real AMFI ARN -->
+        <span class="phone-header-title">AMFI DISTRIBUTOR • [ARN-PLACEHOLDER]</span>
+        <div style="width: 28px;"></div>
+      </header>
+
+      <!-- Phone Content Area -->
+      <div class="phone-screen-content">
+
+        <!-- Segmented Progress Bar -->
+        <div class="step-segmented-bar">
+          <div class="step-meta-left">
+            <span class="step-meta-dot"></span>
+            <span id="step-meta-label">STEP 1 OF 5 • PREVIEW</span>
+          </div>
+          <div class="step-meta-right" id="step-meta-time">⏱ ~1 min</div>
+        </div>
+        <div class="step-tracks-container">
+          <div class="step-track-segment is-active"></div>
+          <div class="step-track-segment"></div>
+          <div class="step-track-segment"></div>
+          <div class="step-track-segment"></div>
+          <div class="step-track-segment"></div>
+        </div>
+
+        <!-- Shared Inline Mascot Mount -->
+        <div id="onboarding-mascot-mount" style="margin-bottom: 8px;"></div>
+
+        <!-- ==================== SCREEN 1: WELCOME & MICRO-SIP VALUE ==================== -->
+        <div class="ob-screen is-active" id="ob-screen-1">
+          <div style="text-align: center; margin-bottom: 16px;">
+            <h2 style="font-size: 1.35rem; color: #0E281C; line-height: 1.2; margin-bottom: 6px;">
+              Invest spare change in low-cost index funds.
+            </h2>
+            <p style="font-size: 0.8125rem; color: #536259; line-height: 1.45;">
+              Simple, automated micro-SIPs starting at ₹10 a day. Backed by regulated Indian asset management companies.
+            </p>
+          </div>
+
+          <!-- Value Proposition Pillars -->
+          <div class="checklist-grid" style="gap: 8px; margin-bottom: 16px;">
+            <div class="checklist-item" style="padding: 10px; margin-bottom: 0;">
+              <div class="checklist-check" style="background: #EBF5EE; color: #155A37;">
+                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+              <div class="checklist-content">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h4 style="font-size: 0.85rem;">Start Tiny</h4>
+                  <span class="substep-badge badge-green">₹10/day</span>
+                </div>
+                <p style="font-size: 0.75rem;">Begin with as little as ₹10/day. No lock-in commitment, scale whenever comfortable.</p>
+              </div>
+            </div>
+
+            <div class="checklist-item" style="padding: 10px; margin-bottom: 0;">
+              <div class="checklist-check" style="background: #EBF5EE; color: #155A37;">
+                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 21h18M3 10h18M5 10v11M19 10v11M9 10v11M15 10v11M12 3l9 7H3z"/></svg>
+              </div>
+              <div class="checklist-content">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h4 style="font-size: 0.85rem;">Direct Mutual Funds</h4>
+                  <!-- COMPLIANCE: "0% Fee" requires Compliance sign-off on direct vs regular plan. Remove until confirmed. -->
+                  <span class="substep-badge badge-blue">Direct Plan</span>
+                </div>
+                <p style="font-size: 0.75rem;">No distributor commission on direct plans. Fund expense ratios apply as disclosed. Units held in your legal name with registered AMCs.</p>
+              </div>
+            </div>
+
+            <div class="checklist-item" style="padding: 10px; margin-bottom: 0;">
+              <div class="checklist-check" style="background: #EBF5EE; color: #155A37;">
+                <svg class="icon-svg" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+              <div class="checklist-content">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h4 style="font-size: 0.85rem;">Zero Lock-in</h4>
+                  <span class="substep-badge" style="background: #F1F5F9; color: #475569;">Instant Exit</span>
+                </div>
+                <p style="font-size: 0.75rem;">Withdraw back to your verified primary bank account at any time without platform penalty.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="gov-what-we-do" style="margin-bottom: 16px;">
+            <strong style="color: #0E281C;">Bank-grade Security:</strong>
+            <span> NPCI & BSE StAR MF compliant settlement rails.</span>
+          </div>
+
+          <div class="ob-bottom-actions">
+            <button class="btn btn-primary btn-block" id="ob-btn-welcome-start">
+              <span>Get Started (Takes ~4 mins)</span>
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== SCREEN 2: PREPARATION PROTOCOL ==================== -->
+        <div class="ob-screen" id="ob-screen-2">
+          <div class="ob-screen-header" style="margin-bottom: 12px;">
+            <h2 style="font-size: 1.35rem; color: #0E281C;">Have these ready before we begin</h2>
+            <p style="font-size: 0.8125rem;">Financial regulations require identity verification. Having these 3 items ready makes the process seamless and takes under 3 minutes.</p>
+          </div>
+
+          <div style="background: #143525; color: #FFFFFF; padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 14px;">
+            <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #86EFAC; font-weight: 700; display: block;">REGULATORY REQUIREMENT</span>
+            <strong style="font-size: 0.9rem;">Official KYC Protocol</strong>
+          </div>
+
+          <div class="checklist-grid" style="gap: 8px; margin-bottom: 12px;">
+            <div class="checklist-item" style="padding: 10px; margin-bottom: 0;">
+              <div class="checklist-check">✓</div>
+              <div class="checklist-content">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h4 style="font-size: 0.85rem;">Permanent Account Number (PAN)</h4>
+                  <span class="substep-badge" style="background: #F1F5F9; color: #475569;">Required</span>
+                </div>
+                <p style="font-size: 0.75rem;">Physical card or 10-digit number linked to your tax record.</p>
+              </div>
+            </div>
+
+            <div class="checklist-item" style="padding: 10px; margin-bottom: 0;">
+              <div class="checklist-check">✓</div>
+              <div class="checklist-content">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h4 style="font-size: 0.85rem;">Aadhaar Card Number</h4>
+                  <span class="substep-badge badge-blue">DigiLocker</span>
+                </div>
+                <p style="font-size: 0.75rem;">Must have access to mobile phone linked with Aadhaar for OTP verification.</p>
+              </div>
+            </div>
+
+            <div class="checklist-item" style="padding: 10px; margin-bottom: 0;">
+              <div class="checklist-check">✓</div>
+              <div class="checklist-content">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h4 style="font-size: 0.85rem;">Indian Bank Account & IFSC</h4>
+                  <span class="substep-badge badge-green">SIP Setup</span>
+                </div>
+                <p style="font-size: 0.75rem;">In your name, for setting up auto-debit SIP and withdrawals.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="gov-what-we-do" style="border-left-color: #15803D; margin-bottom: 14px;">
+            <strong>Can't finish now?</strong> Your progress saves automatically at every tap.
+          </div>
+
+          <div class="ob-bottom-actions">
+            <button class="btn btn-primary btn-block" id="ob-btn-checklist-ready">
+              <span>I Have These Ready • Continue</span>
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+            <button class="save-later-link" id="ob-btn-save-later" style="margin-top: 10px;">
+              Save & Exit for Later
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== SCREEN 3: PACE & DEPLOYMENT ==================== -->
+        <div class="ob-screen" id="ob-screen-3">
+          <div class="ob-screen-header" style="margin-bottom: 10px;">
+            <h2 style="font-size: 1.35rem; color: #0E281C;">Choose your daily or weekly pace</h2>
+            <p style="font-size: 0.8125rem;">Consistency matters more than timing. Pick an amount you won't miss.</p>
+          </div>
+
+          <div class="botanical-tier-card">
+            <div class="botanical-tier-icon">🌱</div>
+            <div class="botanical-tier-info">
+              <h4>BOTANICAL TIER II • First Sprout</h4>
+              <p>Nurturing steady habit from root to leaf.</p>
+            </div>
+          </div>
+
+          <div class="freq-tabs-container">
+            <button class="freq-tab-btn is-active" data-freq="daily">Daily</button>
+            <button class="freq-tab-btn" data-freq="weekly">Weekly</button>
+            <button class="freq-tab-btn" data-freq="monthly">Monthly</button>
+          </div>
+
+          <div class="amount-card-grid">
+            <div class="amount-card" data-amount="20">
+              <div class="amount-card-left">
+                <div class="amount-icon-pill">☕</div>
+                <div class="amount-text-block">
+                  <strong>₹20 <span style="font-size: 12px; font-weight: normal; color: #536259;">/ day</span></strong>
+                  <span class="amount-analogy-text">A cup of tea</span>
+                </div>
+              </div>
+              <div class="amount-check-bubble">✓</div>
+            </div>
+
+            <div class="amount-card is-selected" data-amount="50">
+              <div class="amount-card-left">
+                <div class="amount-icon-pill">🌿</div>
+                <div class="amount-text-block">
+                  <strong>
+                    ₹50 <span style="font-size: 12px; font-weight: normal; color: #536259;">/ day</span>
+                    <!-- COMPLIANCE: "Most chosen" is a fake metric if you have no real data. Removed until analytics confirm it. -->
+                  </strong>
+                  <span class="amount-analogy-text">Optimal baseline for micro-SIP</span>
+                </div>
+              </div>
+              <div class="amount-check-bubble">✓</div>
+            </div>
+
+            <div class="amount-card" data-amount="100">
+              <div class="amount-card-left">
+                <div class="amount-icon-pill">📈</div>
+                <div class="amount-text-block">
+                  <strong>₹100 <span style="font-size: 12px; font-weight: normal; color: #536259;">/ day</span></strong>
+                  <span class="amount-analogy-text">Steady compounding</span>
+                </div>
+              </div>
+              <div class="amount-check-bubble">✓</div>
+            </div>
+          </div>
+
+          <div class="monthly-deployment-card">
+            <div class="deployment-header">
+              <span>MONTHLY DEPLOYMENT</span>
+              <span>📅 100% Equity Index</span>
+            </div>
+            <h3 id="calc-deployment-heading">At ₹50 / day, you will invest ₹1,500 every month.</h3>
+            
+            <div class="fund-preview-box">
+              <span class="fund-badge-in">IN</span>
+              <div class="fund-details-text">
+                <strong>Nifty 50 Index Direct Plan</strong>
+                <span>Top 50 companies in India • Direct / Zero Commission</span>
+              </div>
+            </div>
+
+            <p style="font-size: 10px; color: #536259; line-height: 1.4;">
+              Equities fluctuate in value. Historical 10-12% market returns are for illustrative purposes and not guaranteed. Capital is at risk.
+            </p>
+          </div>
+
+          <div class="ob-bottom-actions">
+            <button class="btn btn-primary btn-block" id="ob-btn-pace-confirm">
+              <span>Confirm Pace & Verify KYC</span>
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== SCREEN 4: IDENTITY AUTHENTICATION & WAITING ==================== -->
+        <div class="ob-screen" id="ob-screen-4">
+          <div class="ob-screen-header" style="margin-bottom: 12px;">
+            <h2 style="font-size: 1.35rem; color: #0E281C;">Identity Authentication</h2>
+            <p style="font-size: 0.8125rem;">Cross-referencing legal credentials with official regulatory registries for institutional compliance.</p>
+          </div>
+
+          <div class="verification-substeps-card">
+            <div class="substep-row">
+              <div class="substep-icon-status substep-status-verified">✓</div>
+              <div class="substep-info">
+                <div class="substep-header">
+                  <h4>PAN Validation</h4>
+                  <span class="substep-badge badge-green">Verified</span>
+                </div>
+                <p>PAN: ABCDE1234F verified via NSDL record</p>
+              </div>
+            </div>
+
+            <div class="substep-row">
+              <div class="substep-icon-status substep-status-verified">✓</div>
+              <div class="substep-info">
+                <div class="substep-header">
+                  <h4>Aadhaar DigiLocker</h4>
+                  <span class="substep-badge badge-green">Verified</span>
+                </div>
+                <p>Linked securely to phone ending in •••• 8912</p>
+              </div>
+            </div>
+
+            <div class="substep-row">
+              <div class="substep-icon-status substep-status-inprogress" id="substep-ckyc-icon"></div>
+              <div class="substep-info">
+                <div class="substep-header">
+                  <h4>CKYC & Bank Verification</h4>
+                  <span class="substep-badge badge-blue" id="substep-ckyc-badge">In Progress</span>
+                </div>
+                <p>Matching account holder legal name against Central Registry records</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="gov-repo-card">
+            <div class="gov-repo-top">
+              <div class="gov-bank-icon">
+                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 21h18M3 10h18M5 10v11M19 10v11M9 10v11M15 10v11M12 3l9 7H3z"/></svg>
+              </div>
+              <div class="gov-repo-top-text">
+                <h3>Verifying with Government Repositories</h3>
+                <div class="gov-avg-time">⏱ Average time: 45–90 seconds</div>
+              </div>
+            </div>
+
+            <div class="registry-exchange-track">
+              <div class="exchange-label-row">
+                <span>Registry Exchange</span>
+                <span id="kyc-elapsed-timer">00:00 elapsed</span>
+              </div>
+              <div class="exchange-progress-bar">
+                <div class="exchange-progress-fill" id="kyc-exchange-fill" style="width: 15%;"></div>
+              </div>
+              <div class="exchange-milestones">
+                <span class="exchange-milestone is-done">Request Dispatched</span>
+                <span class="exchange-milestone" id="milestone-cersai">Awaiting CERSAI Ack</span>
+                <span class="exchange-milestone" id="milestone-settlement">Settlement</span>
+              </div>
+            </div>
+
+            <div class="gov-what-we-do">
+              <strong>What we are doing:</strong> Checking your Central KYC Registry (CKYC) status and matching your bank account name via penny-drop confirmation.
+            </div>
+
+            <p class="gov-reassurance-note">
+              ℹ Please do not press back or refresh. If it takes longer than 2 minutes, we will safely continue in the background and notify you via SMS.
+            </p>
+
+            <div class="gov-ref-tag">
+              <span>● 256-bit TLS Gateway Encrypted</span>
+              <span>REF: CKYC-9042-M</span>
+            </div>
+          </div>
+
+          <div class="botanical-tier-card" style="background: #F8FAFC; border-color: #E2E8F0;">
+            <div class="botanical-tier-icon" style="background: #E0E7FF; color: #3730A3;">🌱</div>
+            <div class="botanical-tier-info">
+              <h4 style="color: #155A37;">GROWTH MILESTONE 1 OF 4</h4>
+              <p><strong>Seed in Soil:</strong> KYC verification sets your firm foundation for systematic wealth growth.</p>
+            </div>
+          </div>
+
+          <div class="ob-bottom-actions">
+            <button class="btn btn-primary btn-block" id="ob-btn-checking-status" style="pointer-events: none;">
+              <svg class="icon-svg" style="animation: spin 1s linear infinite;" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg>
+              <span>Checking Status with Registry...</span>
+            </button>
+            <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+
+            <div id="kyc-verified-box" style="display: none; margin-bottom: 8px;">
+              <button class="btn btn-primary btn-block" id="ob-btn-kyc-proceed">
+                <span>KYC Verified • Proceed to Mandate</span>
+                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+
+            <button class="btn btn-secondary btn-block" id="ob-btn-kyc-background" style="margin-top: 8px; font-size: 13px;">
+              💬 Continue in Background (Notify via SMS)
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== SCREEN 5: MILESTONE ACHIEVED & MANDATE ==================== -->
+        <div class="ob-screen" id="ob-screen-5">
+          <div style="text-align: center; margin-bottom: 14px;">
+            <span class="substep-badge" style="background: #E0E7FF; color: #3730A3; font-size: 11px;">Milestone Achieved</span>
+            <div style="margin: 8px 0;">
+              <span style="font-size: 12px; font-weight: 700; color: #15803D; background: #DCFCE7; padding: 3px 10px; border-radius: var(--radius-sm);">
+                🌱 First Sprout Planted 🌱
+              </span>
+            </div>
+            <h2 style="font-size: 1.35rem; color: #0E281C; line-height: 1.25; margin-bottom: 4px;">
+              Your daily SIP is officially set up!
+            </h2>
+            <p style="font-size: 0.8125rem; color: #536259; line-height: 1.4;">
+              A steady seed planted today. Your discipline begins silently compounding through patient, systematic stewardship.
+            </p>
+          </div>
+
+          <div class="mandate-summary-card">
+            <div class="mandate-header">
+              <h4>
+                <svg class="icon-svg" style="color: #155A37;" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Mandate & Order Summary
+              </h4>
+              <!-- COMPLIANCE: "NPCI Active" label on a simulator screen is misleading. Labeled as demo. -->
+              <span class="badge-npci" style="background: #F1F5F9; color: #64748B; border: 1px solid #CBD5E1;">DEMO ONLY</span>
+            </div>
+
+            <div class="mandate-row">
+              <span class="mandate-label">Daily Commitment</span>
+              <span class="mandate-value" id="summary-daily-commitment">₹50 / day</span>
+            </div>
+            <div class="mandate-row">
+              <span class="mandate-label">Fund Selected</span>
+              <span class="mandate-value">Bandhan Nifty 50 Index Fund<br><small style="color: #15803D; font-weight: normal;">Direct-Growth • 0% Commission</small></span>
+            </div>
+            <div class="mandate-row">
+              <span class="mandate-label">Auto-Debit Route</span>
+              <span class="mandate-value">HDFC Bank ••4821 via e-NACH</span>
+            </div>
+            <div class="mandate-row">
+              <span class="mandate-label">First Scheduled Debit</span>
+              <span class="mandate-value">Tomorrow, 09:30 AM IST</span>
+            </div>
+            <div class="mandate-row">
+              <span class="mandate-label">Estimated Allotment</span>
+              <span class="mandate-value">Within T+1 Business Days</span>
+            </div>
+          </div>
+
+          <div class="micro-value-grid">
+            <div class="micro-value-card">
+              <div style="color: #155A37; font-size: 16px; margin-bottom: 2px;">⚡</div>
+              <h5>1-Tap Control</h5>
+              <p>Pause, modify, or stop your SIP anytime with zero friction.</p>
+            </div>
+            <div class="micro-value-card">
+              <div style="color: #155A37; font-size: 16px; margin-bottom: 2px;">🛡</div>
+              <h5>Zero Hidden Cost</h5>
+              <p>No entry loads, no exit penalties, no distributor cuts.</p>
+            </div>
+          </div>
+
+          <div class="botanical-ledger-card">
+            <div class="ledger-icon-box">🪴</div>
+            <div class="ledger-text">
+              <h4>BOTANICAL LEDGER</h4>
+              <strong>Stage 2 of 4 Active</strong>
+              <p>Level 3 'Rooted Sapling' unlocks after 3 consecutive monthly cycles.</p>
+            </div>
+          </div>
+
+          <div class="ob-bottom-actions">
+            <button class="btn btn-primary btn-block" id="ob-btn-go-portfolio">
+              <span>Go to Your Portfolio</span>
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+            <button class="btn btn-secondary btn-block" id="ob-btn-download-pdf" style="margin-top: 8px; font-size: 13px;">
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              <span>Download Mandate Confirmation (PDF)</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Phone In-App Bottom Compliance Bar -->
+      <div class="compliance-disclaimer-strip" style="font-size: 11px; padding: 6px 10px;">
+        <span data-i18n="complianceShort">Mutual fund investments are subject to market risks. Read all scheme documents carefully.</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- Sticky Global Compliance Disclaimer Bar -->
+  <aside class="compliance-disclaimer-strip compliance-sticky-bottom" aria-label="Regulatory risk disclosure">
+    <div style="max-width: 800px; margin: 0 auto;">
+      <span data-i18n="complianceDisclaimer">
+      <!-- COMPLIANCE: Replace [ARN-PLACEHOLDER] with your real AMFI ARN before going live -->
+      Mutual fund investments are subject to market risks. Read all scheme-related documents carefully before investing. Sprout Technologies Pvt. Ltd. is a SEBI-registered mutual fund distributor (ARN: [ARN-PLACEHOLDER]). Past performance is not an indicator of future returns.
+      </span>
+    </div>
+  </aside>
+
+  <!-- Developer Telemetry Inspector -->
+  <div class="telemetry-inspector is-collapsed" id="telemetry-inspector">
+    <div class="telemetry-header" id="toggle-telemetry-btn">
+      <span>Funnel Telemetry Inspector</span>
+      <span>▲ Click to view</span>
+    </div>
+    <div class="telemetry-body" id="telemetry-log-content"></div>
+  </div>
+
+  <script src="js/strings.js"></script>
+  <script src="js/mascot.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/onboarding.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Initialize Mascot mount
+      const obMascotMount = document.getElementById("onboarding-mascot-mount");
+      if (obMascotMount) {
+        obMascotMount.innerHTML = window.SproutMascot.render("idle");
+      }
+
+      // Initialize Onboarding Flow
+      const onboarding = new window.OnboardingFlow();
+      onboarding.init();
+
+      // Language Switcher
+      function updateLanguage(lang) {
+        const strings = window.SPROUT_STRINGS[lang] || window.SPROUT_STRINGS.en;
+        document.querySelectorAll("[data-i18n]").forEach(elem => {
+          const key = elem.getAttribute("data-i18n");
+          if (strings[key]) {
+            elem.textContent = strings[key];
+          }
+        });
+        document.querySelectorAll(".lang-btn").forEach(btn => {
+          btn.classList.toggle("is-active", btn.getAttribute("data-lang") === lang);
+        });
+        document.documentElement.lang = lang;
+      }
+
+      document.querySelectorAll(".lang-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const selected = btn.getAttribute("data-lang");
+          updateLanguage(selected);
+          window.sproutAnalytics.track("language_switched", { language: selected });
+        });
+      });
+
+      // Telemetry drawer
+      const telemetryDrawer = document.getElementById("telemetry-log-content");
+      if (telemetryDrawer) {
+        window.sproutAnalytics.onEvent((eventData) => {
+          const entry = document.createElement("div");
+          entry.className = "telemetry-item";
+          entry.innerHTML = `
+            <span class="telemetry-time">${eventData.timestamp.split("T")[1].replace("Z", "")}</span>
+            <strong>${eventData.event}</strong>
+            <code>${JSON.stringify(eventData.properties)}</code>
+          `;
+          telemetryDrawer.prepend(entry);
+        });
+      }
+
+      const toggleTelBtn = document.getElementById("toggle-telemetry-btn");
+      if (toggleTelBtn) {
+        toggleTelBtn.addEventListener("click", () => {
+          const drawer = document.getElementById("telemetry-inspector");
+          if (drawer) drawer.classList.toggle("is-collapsed");
+        });
+      }
+
+      window.sproutAnalytics.track("app_opened");
+    });
+  </script>
+</body>
+</html>

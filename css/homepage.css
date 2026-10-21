@@ -1,0 +1,412 @@
+/* Sprout 2.0 Homepage Styling
+   Mobile-first with clean desktop rearrangement.
+   Strict rules: No purple gradients, no pill buttons, no emojis, no fake metrics */
+
+/* Layout Container */
+.container {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+/* Header & Navigation */
+.site-header {
+  background-color: var(--color-bg-page);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 90;
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: var(--color-deep-pine);
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  letter-spacing: -0.02em;
+}
+.brand-logo-icon {
+  width: 32px;
+  height: 32px;
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Mode and Language Switchers */
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+.lang-btn {
+  border: none;
+  background: transparent;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-xs);
+  min-height: 32px;
+}
+.lang-btn.is-active {
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+/* App Simulator Tab Switcher */
+.view-mode-bar {
+  background-color: var(--color-deep-pine);
+  color: #E2E8F0;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-xs);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.view-mode-tabs {
+  display: inline-flex;
+  gap: var(--space-2);
+}
+.view-mode-btn {
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  font-weight: 500;
+}
+.view-mode-btn.is-active {
+  background-color: #FFFFFF;
+  color: var(--color-deep-pine);
+  font-weight: 700;
+}
+
+/* Hero Section */
+.hero-section {
+  padding: var(--space-10) 0 var(--space-8);
+  text-align: left;
+}
+.hero-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-xs);
+  width: fit-content;
+}
+.hero-title {
+  font-size: var(--font-size-2xl);
+  line-height: 1.15;
+  color: var(--color-deep-pine);
+}
+.hero-subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-relaxed);
+  max-width: 540px;
+}
+.hero-cta-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+.hero-mascot-card {
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Desktop QR Code & Store Handoff */
+.desktop-qr-card {
+  display: none;
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+.desktop-qr-code {
+  width: 72px;
+  height: 72px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-border);
+  padding: 4px;
+}
+.desktop-qr-text {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+.desktop-qr-text strong {
+  color: var(--color-deep-pine);
+  display: block;
+  font-size: var(--font-size-sm);
+  margin-bottom: 2px;
+}
+
+/* "What you'll need" Pre-KYC Reassurance Strip (Directly fixes CS Drop-off) */
+.pre-checklist-section {
+  padding: var(--space-8) 0;
+  background-color: var(--color-bg-surface);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+.pre-checklist-header {
+  margin-bottom: var(--space-5);
+  text-align: left;
+}
+.pre-checklist-header h2 {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--space-1);
+}
+.checklist-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+/* 3-Step Journey Section */
+.steps-section {
+  padding: var(--space-10) 0;
+}
+.section-heading {
+  text-align: left;
+  margin-bottom: var(--space-8);
+}
+.section-heading h2 {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--space-2);
+}
+.section-heading p {
+  font-size: var(--font-size-base);
+  max-width: 600px;
+}
+.steps-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+.step-card {
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  text-align: left;
+  position: relative;
+}
+.step-card-num {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-primary);
+  background-color: var(--color-primary-light);
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-xs);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-3);
+}
+.step-card h3 {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-2);
+}
+
+/* Transparency & Regulation Section */
+.trust-section {
+  padding: var(--space-10) 0;
+  background-color: var(--color-bg-surface);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+.trust-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+.trust-card {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+  background-color: var(--color-bg-page);
+}
+.trust-card-icon {
+  width: 36px;
+  height: 36px;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-3);
+}
+.trust-card h3 {
+  font-size: var(--font-size-base);
+  margin-bottom: var(--space-1);
+}
+
+/* FAQ Accordion Section */
+.faq-section {
+  padding: var(--space-10) 0;
+}
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 760px;
+}
+.faq-item {
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.faq-question {
+  width: 100%;
+  padding: var(--space-4);
+  background: none;
+  border: none;
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-deep-pine);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.faq-icon-arrow {
+  transition: transform var(--transition-fast);
+}
+.faq-item.is-open .faq-icon-arrow {
+  transform: rotate(180deg);
+}
+.faq-answer {
+  display: none;
+  padding: 0 var(--space-4) var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-relaxed);
+}
+.faq-item.is-open .faq-answer {
+  display: block;
+}
+
+/* Final CTA Repeat Section */
+.repeat-cta-section {
+  padding: var(--space-12) 0;
+  text-align: center;
+  background-color: var(--color-bg-card-highlight);
+  border-top: 1px solid var(--color-border);
+}
+.repeat-cta-content {
+  max-width: 560px;
+  margin: 0 auto;
+}
+.repeat-cta-content h2 {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--space-2);
+}
+.repeat-cta-content p {
+  margin-bottom: var(--space-5);
+}
+
+/* Footer */
+.site-footer {
+  background-color: var(--color-deep-pine);
+  color: #D1D5DB;
+  padding: var(--space-10) 0 var(--space-6);
+  font-size: var(--font-size-xs);
+}
+.footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+.footer-links a {
+  color: #9CA3AF;
+  text-decoration: none;
+}
+.footer-links a:hover {
+  color: #FFFFFF;
+  text-decoration: underline;
+}
+.footer-disclaimer-text {
+  color: #9CA3AF;
+  line-height: var(--line-height-relaxed);
+}
+
+/* Responsive Breakpoint for Desktop */
+@media (min-width: 768px) {
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    align-items: center;
+    gap: var(--space-10);
+  }
+  .hero-title {
+    font-size: var(--font-size-3xl);
+  }
+  .hero-cta-group {
+    flex-direction: row;
+    align-items: center;
+  }
+  .desktop-qr-card {
+    display: flex;
+  }
+  .checklist-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .steps-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .trust-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .footer-inner {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+}

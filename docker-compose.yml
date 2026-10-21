@@ -1,0 +1,33 @@
+version: "3.9"
+
+# Sprout 2.0 - Local Development Database
+# Usage:
+#   docker compose up -d          <- start Postgres in background
+#   docker compose down -v        <- stop and wipe all data (clean slate)
+#   docker compose logs db        <- view logs
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: sprout_db_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sprout
+      POSTGRES_USER: sprout
+      POSTGRES_PASSWORD: sprout_dev_only
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/002_auth.sql:/docker-entrypoint-initdb.d/02-auth.sql:ro
+      - ./database/test_seed.sql:/docker-entrypoint-initdb.d/03-test-seed.sql:ro
+      - sprout_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sprout -d sprout"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  sprout_pgdata:
+    driver: local

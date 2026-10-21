@@ -1,0 +1,290 @@
+openapi: 3.0.3
+info:
+  title: Sprout 2.0 Core Financial & Onboarding API
+  description: >
+    Production REST API for Sprout 2.0.
+    Handles OTP auth, saved progress, paperless KYC verification, BSE Star MF order routing,
+    and append-only double-entry ledger bookkeeping.
+    All monetary units are strictly integer paise (100 paise = 1 INR).
+  version: 2.0.0
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local Java Development Environment
+  - url: https://api.sproutinvest.in/api/v1
+    description: Production Environment (TLS 1.3 Only)
+
+paths:
+  /auth/otp/send:
+    post:
+      summary: Send one-time OTP for login / signup
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone:
+                  type: string
+                  example: "+919876543210"
+      responses:
+        '200':
+          description: OTP dispatched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "SENT" }
+                  lockoutSeconds: { type: integer, example: 0 }
+        '429':
+          description: Too many attempts (Rate-limited)
+
+  /auth/otp/verify:
+    post:
+      summary: Verify OTP and exchange for JWT session
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, otp]
+              properties:
+                phone: { type: string, example: "+919876543210" }
+                otp: { type: string, example: "849201" }
+      responses:
+        '200':
+          description: Authenticated session established
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken: { type: string }
+                  refreshToken: { type: string }
+                  user:
+                    type: object
+                    properties:
+                      id: { type: string, format: uuid }
+                      phone: { type: string }
+                      isKycVerified: { type: boolean }
+
+  /onboarding:
+    get:
+      summary: Retrieve saved onboarding state (powers cross-device resumption)
+      tags: [Onboarding]
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  currentScreen: { type: integer, example: 2 }
+                  answers: { type: object }
+                  updatedAt: { type: string, format: date-time }
+    put:
+      summary: Save current onboarding progress and answers
+      tags: [Onboarding]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentScreen, answers]
+              properties:
+                currentScreen: { type: integer, minimum: 1, maximum: 5 }
+                answers: { type: object }
+      responses:
+        '200':
+          description: Saved successfully
+
+  /consents:
+    post:
+      summary: Record mandatory regulatory risk disclaimer acceptance
+      tags: [Compliance]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [documentType, version]
+              properties:
+                documentType: { type: string, enum: [RISK_DISCLAIMER, TERMS_OF_SERVICE, PRIVACY_POLICY] }
+                version: { type: string, example: "2026.1" }
+      responses:
+        '201':
+          description: Consent logged to immutable audit ledger
+
+  /kyc/initiate:
+    post:
+      summary: Start automated KYC pipeline with PAN & Aadhaar DigiLocker
+      tags: [KYC Pipeline]
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pan, aadhaarLast4]
+              properties:
+                pan: { type: string, pattern: '^[A-Z]{5}[0-9]{4}[A-Z]{1}$' }
+                aadhaarLast4: { type: string, pattern: '^[0-9]{4}$' }
+                bankAccountNumber: { type: string }
+                ifscCode: { type: string, pattern: '^[A-Z]{4}0[A-Z0-9]{6}$' }
+      responses:
+        '202':
+          description: KYC request dispatched to Central Depository
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: "IN_PROGRESS" }
+                  estimatedWaitSeconds: { type: integer, example: 45 }
+                  kraReference: { type: string, example: "CKYC-9042-M" }
+
+  /kyc/status:
+    get:
+      summary: Poll current KYC status and heartbeat
+      tags: [KYC Pipeline]
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, enum: [NOT_STARTED, IN_PROGRESS, PENDING, VERIFIED, REJECTED, NEEDS_RETRY] }
+                  substeps:
+                    type: object
+                    properties:
+                      pan: { type: string, example: "VERIFIED" }
+                      digilocker: { type: string, example: "VERIFIED" }
+                      bankPennyDrop: { type: string, example: "IN_PROGRESS" }
+                  statusMessage: { type: string, example: "Validating with Income Tax Depository..." }
+
+  /webhooks/kyc:
+    post:
+      summary: Asynchronous webhook receiver for KRA and DigiLocker callbacks
+      tags: [Webhooks]
+      parameters:
+        - in: header
+          name: X-Provider-Signature
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [eventId, eventType, timestamp, payload]
+              properties:
+                eventId: { type: string, example: "evt_kra_892149" }
+                eventType: { type: string, example: "KYC_VERIFIED" }
+                timestamp: { type: string, format: date-time }
+                payload: { type: object }
+      responses:
+        '200':
+          description: Event received and queued for asynchronous processing
+        '401':
+          description: Invalid cryptographic signature
+        '409':
+          description: Duplicate event ignored (Idempotent)
+
+  /funds:
+    get:
+      summary: Retrieve curated list of approved low-cost index funds
+      tags: [Investing]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: string, format: uuid }
+                    name: { type: string, example: "Bandhan Nifty 50 Index Fund" }
+                    providerCode: { type: string, example: "INF209K01157" }
+                    category: { type: string, example: "NIFTY_50_INDEX" }
+                    riskometer: { type: string, example: "VERY_HIGH" }
+                    minInvestmentPaise: { type: integer, example: 10000 }
+                    currentNavPaise: { type: integer, example: 28450 }
+
+  /orders:
+    post:
+      summary: Place a new micro-SIP or lump-sum index investment (Requires Idempotency-Key)
+      tags: [Investing]
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: { type: string, example: "idem_9102834-a1b2-c3d4" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fundId, amountPaise, paymentMethod]
+              properties:
+                fundId: { type: string, format: uuid }
+                amountPaise: { type: integer, minimum: 1000, example: 10000 }
+                paymentMethod: { type: string, enum: [UPI_AUTOPAY, UPI_ONE_TIME, E_NACH] }
+      responses:
+        '201':
+          description: Order placed and awaiting payment confirmation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderId: { type: string, format: uuid }
+                  status: { type: string, example: "PAYMENT_PENDING" }
+                  amountPaise: { type: integer, example: 10000 }
+                  upiDeepLink: { type: string, example: "upi://pay?pa=bse.starmf@hdfcbank&am=100.00" }
+
+  /portfolio:
+    get:
+      summary: Retrieve investor current positions, holdings, and ledger balance
+      tags: [Investing]
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalInvestedPaise: { type: integer, example: 150000 }
+                  currentValuationPaise: { type: integer, example: 168240 }
+                  holdings:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        fundName: { type: string }
+                        units: { type: number, example: 59.1245 }
+                        investedAmountPaise: { type: integer }
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

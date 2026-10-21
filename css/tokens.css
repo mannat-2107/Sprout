@@ -1,0 +1,89 @@
+/* Sprout 2.0 Design Tokens 
+   Strict anti-vibe-coding: No purple gradients, no pill buttons, WCAG AA compliant */
+:root {
+  /* Color Palette - Trustworthy Botanical & Financial Neutral */
+  --color-primary: #155A37;
+  --color-primary-hover: #0F4328;
+  --color-primary-active: #092B19;
+  --color-primary-light: #EBF5EE;
+  
+  --color-deep-pine: #0E281C;
+  --color-accent-growth: #2E8B57;
+  --color-accent-gold: #C08A1B;
+  
+  --color-bg-page: #FBFBF9;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-subtle: #F4F6F4;
+  --color-bg-card-highlight: #F0F7F2;
+
+  --color-border: #E0E5E2;
+  --color-border-subtle: #ECEFE8;
+  --color-border-strong: #BDC8C1;
+  --color-border-focus: #155A37;
+
+  --color-text-main: #141C17;
+  --color-text-muted: #536259;
+  --color-text-inverse: #FFFFFF;
+  --color-text-disabled: #8E9C94;
+
+  --color-success: #15803D;
+  --color-success-bg: #DCFCE7;
+  --color-warning: #B45309;
+  --color-warning-bg: #FEF3C7;
+  --color-error: #B91C1C;
+  --color-error-bg: #FEE2E2;
+
+  /* Typography Scale */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Devanagari", sans-serif;
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.8125rem;  /* 13px - Compliance disclaimer baseline */
+  --font-size-base: 0.9375rem;/* 15px */
+  --font-size-md: 1rem;       /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.375rem;   /* 22px */
+  --font-size-2xl: 1.75rem;   /* 28px */
+  --font-size-3xl: 2.25rem;   /* 36px */
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+
+  /* Spacing Scale (8pt grid basis) */
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.25rem;  /* 20px */
+  --space-6: 1.5rem;   /* 24px */
+  --space-8: 2rem;     /* 32px */
+  --space-10: 2.5rem;  /* 40px */
+  --space-12: 3rem;    /* 48px */
+  --space-16: 4rem;    /* 64px */
+
+  /* Radii - Rectangular, modern, non-pill */
+  --radius-xs: 3px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Tap target minimums */
+  --tap-target-min: 44px;
+
+  /* Elevation Shadows (subtle, clean, no blur slop) */
+  --shadow-sm: 0 1px 2px rgba(16, 28, 21, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(16, 28, 21, 0.08), 0 2px 4px -2px rgba(16, 28, 21, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(16, 28, 21, 0.08), 0 4px 6px -4px rgba(16, 28, 21, 0.04);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
