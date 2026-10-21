@@ -117,6 +117,4 @@ http://localhost:8080/app.html
 
 ---
 
-## 📄 License
 
-Private repository — © Sprout Technologies Pvt. Ltd.
