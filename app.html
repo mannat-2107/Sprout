@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sprout App - First-Time Mobile Investing in India</title>
-  <meta name="description" content="Sprout Mobile Onboarding App. Fast paperless KYC and instant micro-SIP setup starting at ₹10/day.">
+  <title>Sprout App – Paperless Micro-SIP Investing in India</title>
+  <meta name="description" content="Start investing in mutual funds from ₹10/day. Paperless KYC, direct plans, zero platform fee.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
   <link rel="stylesheet" href="css/tokens.css">
@@ -12,143 +12,155 @@
   <link rel="stylesheet" href="css/onboarding.css">
 
   <style>
-    /* Dedicated App Shell Layout */
-    body {
-      background-color: #F0F4F1;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+    /* ── App Shell ──────────────────────────────────────── */
+    body { background: #EEF2EE; display: flex; flex-direction: column; min-height: 100vh; }
+
     .app-standalone-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 16px 8px 48px;
-    }
-    .app-top-nav-bar {
-      width: 100%;
-      max-width: 420px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      padding: 0 4px;
-    }
-    .app-back-to-site {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: #155A37;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 700;
-      background: #FFFFFF;
-      padding: 6px 12px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--color-border);
-    }
-    .app-back-to-site:hover {
-      background: #EBF5EE;
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start;
+      padding: 16px 8px 56px;
     }
 
-    /* Telemetry drawer */
+    .app-top-nav-bar {
+      width: 100%; max-width: 420px;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px; padding: 0 4px;
+    }
+
+    .app-back-to-site {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: #155A37; text-decoration: none; font-size: 13px; font-weight: 700;
+      background: #FFF; padding: 6px 12px;
+      border-radius: var(--radius-sm); border: 1px solid var(--color-border);
+    }
+    .app-back-to-site:hover { background: #EBF5EE; }
+
+    /* ── Toast ──────────────────────────────────────────── */
+    .app-toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+      min-width: 260px; max-width: 90vw;
+      background: #0E281C; color: #E2E8F0;
+      padding: 10px 18px; border-radius: var(--radius-md);
+      font-size: 13px; font-weight: 500;
+      display: flex; align-items: center; gap: 8px;
+      opacity: 0; transition: opacity .25s ease, transform .25s ease;
+      z-index: 2000; pointer-events: none;
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    }
+    .app-toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .app-toast.toast-error   { background: #7F1D1D; }
+    .app-toast.toast-warning { background: #78350F; }
+
+    /* ── Aadhaar Mode Toggle ────────────────────────────── */
+    .aadhaar-mode-row {
+      display: flex; gap: 6px; margin-bottom: 10px;
+    }
+    .aadhaar-mode-btn {
+      flex: 1; padding: 8px 4px; border: 1.5px solid #CBD5E1;
+      background: #F8FAFC; border-radius: var(--radius-sm);
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      color: #536259; transition: all .15s ease; text-align: center;
+    }
+    .aadhaar-mode-btn.is-active {
+      background: #EBF5EE; border-color: #155A37; color: #155A37;
+    }
+
+    /* ── Auth modal tab row ─────────────────────────────── */
+    .auth-switch-row {
+      text-align: center; margin-top: 16px; font-size: 12px; color: #64748B;
+    }
+    .auth-switch-row button {
+      background: none; border: none; color: #155A37; font-weight: 700;
+      cursor: pointer; font-size: 12px; text-decoration: underline;
+    }
+
+    /* ── Name field ─────────────────────────────────────── */
+    .auth-name-field {
+      margin-bottom: 10px;
+    }
+    .auth-name-field label {
+      display: block; font-size: 11px; font-weight: 700; color: #536259;
+      text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px;
+    }
+
+    /* ── OTP hint banner ────────────────────────────────── */
+    .otp-hint-banner {
+      background: #ECFDF5; border: 1px solid #BBF7D0;
+      border-radius: var(--radius-sm); padding: 8px 12px;
+      font-size: 11px; color: #15803D; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    /* ── Telemetry drawer ───────────────────────────────── */
     .telemetry-inspector {
-      position: fixed;
-      bottom: 48px;
-      right: 16px;
-      width: 320px;
-      max-height: 280px;
-      background: #0E281C;
-      color: #E2E8F0;
-      border: 1px solid #2E8B57;
-      border-radius: var(--radius-sm);
-      box-shadow: var(--shadow-lg);
-      z-index: 1000;
-      font-size: 11px;
-      display: flex;
-      flex-direction: column;
-      transition: transform 0.2s ease;
+      position: fixed; bottom: 48px; right: 16px; width: 300px; max-height: 270px;
+      background: #0E281C; color: #E2E8F0;
+      border: 1px solid #2E8B57; border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-lg); z-index: 1000; font-size: 11px;
+      display: flex; flex-direction: column;
+      transition: transform .2s ease;
     }
-    .telemetry-inspector.is-collapsed {
-      transform: translateY(calc(100% - 32px));
-    }
+    .telemetry-inspector.is-collapsed { transform: translateY(calc(100% - 32px)); }
     .telemetry-header {
-      padding: 6px 10px;
-      background: #155A37;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      user-select: none;
+      padding: 6px 10px; background: #155A37; font-weight: 700;
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; user-select: none;
     }
     .telemetry-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 8px;
-      font-family: monospace;
-      max-height: 230px;
+      flex: 1; overflow-y: auto; padding: 8px; font-family: monospace; max-height: 230px;
     }
-    .telemetry-item {
-      padding: 4px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .telemetry-time {
-      color: #94A3B8;
-      margin-right: 4px;
-    }
-    .telemetry-item code {
-      display: block;
-      color: #86EFAC;
-      font-size: 10px;
-      word-break: break-all;
+    .telemetry-item { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,.1); }
+    .telemetry-time { color: #94A3B8; margin-right: 4px; }
+    .telemetry-item code { display: block; color: #86EFAC; font-size: 10px; word-break: break-all; }
+
+    /* ── Profile bank info fix ──────────────────────────── */
+    .profile-bank-row {
+      display: flex; align-items: center; justify-content: space-between;
     }
   </style>
 </head>
 <body>
 
   <main class="app-standalone-container">
-    <!-- Top Bar with Return to Website Link & Language Switcher -->
+
+    <!-- Top Bar -->
     <div class="app-top-nav-bar">
-      <a href="index.html" class="app-back-to-site" title="Return to Sprout marketing website">
-        ← Back to Website
-      </a>
+      <a href="index.html" class="app-back-to-site" title="Return to Sprout website">← Website</a>
       <div class="lang-toggle">
         <button class="lang-btn is-active" data-lang="en">EN</button>
         <button class="lang-btn" data-lang="hi">हिंदी</button>
       </div>
     </div>
 
-    <!-- Phone Mockup Frame (Realistic sub-₹10,000 mobile aspect) -->
+    <!-- Phone Frame -->
     <div class="phone-mockup-frame">
-      <!-- System Status Bar -->
+
+      <!-- Status Bar -->
       <div class="phone-status-bar">
         <span>09:41</span>
         <span>4G · VoLTE · 88%</span>
       </div>
 
-      <!-- App Header with AMFI Registration Indicator & Profile Action -->
+      <!-- App Header -->
       <header class="phone-app-header">
-        <a href="index.html" class="phone-back-btn" aria-label="Exit to website" title="Exit to Sprout Home">
+        <a href="index.html" class="phone-back-btn" aria-label="Exit to website">
           <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </a>
-        <span class="phone-header-title" style="font-size: 11px; letter-spacing: 0.05em;">AMFI • [ARN-PLACEHOLDER]</span>
-        <button id="btn-header-profile" class="header-profile-btn" aria-label="View Profile / Log In">
-          <svg class="icon-svg" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="phone-header-title" style="font-size:11px;letter-spacing:.05em">AMFI · [ARN-PLACEHOLDER]</span>
+        <button id="btn-header-profile" class="header-profile-btn" aria-label="Profile / Login">
+          <svg class="icon-svg" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           <span id="header-user-status" class="header-user-pill">Login</span>
         </button>
       </header>
 
-      <!-- Phone Content Area -->
+      <!-- Phone Content -->
       <div class="phone-screen-content">
 
-        <!-- Segmented Progress Bar -->
+        <!-- Progress Bar -->
         <div class="step-segmented-bar">
           <div class="step-meta-left">
             <span class="step-meta-dot"></span>
-            <span id="step-meta-label">STEP 1 OF 5 • PREVIEW</span>
+            <span id="step-meta-label">STEP 1 OF 5 • WELCOME</span>
           </div>
           <div class="step-meta-right" id="step-meta-time">⏱ ~1 min</div>
         </div>
@@ -160,165 +172,168 @@
           <div class="step-track-segment"></div>
         </div>
 
-        <!-- Shared Inline Mascot Mount -->
-        <div id="onboarding-mascot-mount" style="margin-bottom: 8px;"></div>
+        <!-- Mascot -->
+        <div id="onboarding-mascot-mount" style="margin-bottom:8px"></div>
 
-        <!-- ==================== SCREEN 1: WELCOME & MICRO-SIP VALUE ==================== -->
+        <!-- ═══════════════════ SCREEN 1: WELCOME ═══════════════════ -->
         <div class="ob-screen is-active" id="ob-screen-1">
-          <div style="text-align: center; margin-bottom: 16px;">
-            <h2 style="font-size: 1.35rem; color: #0E281C; line-height: 1.2; margin-bottom: 6px;">
-              Invest spare change in low-cost index funds.
+          <div style="text-align:center;margin-bottom:16px">
+            <h2 style="font-size:1.35rem;color:#0E281C;line-height:1.2;margin-bottom:6px">
+              Invest spare change in index funds
             </h2>
-            <p style="font-size: 0.8125rem; color: #536259; line-height: 1.45;">
-              Simple, automated micro-SIPs starting at ₹10 a day. Backed by regulated Indian asset management companies.
+            <p style="font-size:.8125rem;color:#536259;line-height:1.45">
+              Micro-SIPs from ₹10/day — direct plans, zero platform fee, 100% paperless KYC.
             </p>
           </div>
 
-          <!-- Value Proposition Pillars -->
-          <div class="checklist-grid" style="gap: 8px; margin-bottom: 16px;">
-            <div class="checklist-item" style="padding: 10px; margin-bottom: 0;">
-              <div class="checklist-check" style="background: #EBF5EE; color: #155A37;">
+          <div class="checklist-grid" style="gap:8px;margin-bottom:16px">
+            <div class="checklist-item" style="padding:10px;margin-bottom:0">
+              <div class="checklist-check" style="background:#EBF5EE;color:#155A37">
                 <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               </div>
               <div class="checklist-content">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <h4 style="font-size: 0.85rem;">Start Tiny</h4>
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <h4 style="font-size:.85rem">Start Tiny</h4>
                   <span class="substep-badge badge-green">₹10/day</span>
                 </div>
-                <p style="font-size: 0.75rem;">Begin with as little as ₹10/day. No lock-in commitment, scale whenever comfortable.</p>
+                <p style="font-size:.75rem">No lock-in. Pause or stop anytime.</p>
               </div>
             </div>
 
-            <div class="checklist-item" style="padding: 10px; margin-bottom: 0;">
-              <div class="checklist-check" style="background: #EBF5EE; color: #155A37;">
+            <div class="checklist-item" style="padding:10px;margin-bottom:0">
+              <div class="checklist-check" style="background:#EBF5EE;color:#155A37">
                 <svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 21h18M3 10h18M5 10v11M19 10v11M9 10v11M15 10v11M12 3l9 7H3z"/></svg>
               </div>
               <div class="checklist-content">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <h4 style="font-size: 0.85rem;">Direct Mutual Funds</h4>
-                  <!-- COMPLIANCE: "0% Fee" requires Compliance sign-off on direct vs regular plan. Remove until confirmed. -->
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <h4 style="font-size:.85rem">Direct Mutual Funds</h4>
                   <span class="substep-badge badge-blue">Direct Plan</span>
                 </div>
-                <p style="font-size: 0.75rem;">No distributor commission on direct plans. Fund expense ratios apply as disclosed. Units held in your legal name with registered AMCs.</p>
+                <p style="font-size:.75rem">No distributor commission. Fund expense ratios apply as disclosed.</p>
               </div>
             </div>
 
-            <div class="checklist-item" style="padding: 10px; margin-bottom: 0;">
-              <div class="checklist-check" style="background: #EBF5EE; color: #155A37;">
+            <div class="checklist-item" style="padding:10px;margin-bottom:0">
+              <div class="checklist-check" style="background:#EBF5EE;color:#155A37">
                 <svg class="icon-svg" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
               </div>
               <div class="checklist-content">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <h4 style="font-size: 0.85rem;">Flexible Redemption</h4>
-                  <span class="substep-badge" style="background: #F1F5F9; color: #475569;">Anytime Exit</span>
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <h4 style="font-size:.85rem">Anytime Exit</h4>
+                  <span class="substep-badge" style="background:#F1F5F9;color:#475569">Flexible</span>
                 </div>
-                <p style="font-size: 0.75rem;">Withdraw back to your verified primary bank account at any time without platform penalty.</p>
+                <p style="font-size:.75rem">Withdraw to your verified bank account at any time — no platform penalty.</p>
               </div>
             </div>
           </div>
 
-          <div class="gov-what-we-do" style="margin-bottom: 16px;">
-            <strong style="color: #0E281C;">Bank-grade Security:</strong>
-            <span> NPCI & BSE StAR MF compliant settlement rails.</span>
+          <div class="gov-what-we-do" style="margin-bottom:16px">
+            <strong style="color:#0E281C">NPCI &amp; BSE StAR MF</strong>
+            <span> compliant settlement. SEBI-registered distributor.</span>
           </div>
 
-          <div class="ob-bottom-actions">
+          <div class="ob-bottom-actions" style="display:flex;flex-direction:column;gap:8px">
             <button class="btn btn-primary btn-block" id="ob-btn-welcome-start">
-              <span>Get Started (Takes ~4 mins)</span>
+              <span>Get Started — Takes ~4 mins</span>
               <svg class="icon-svg" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+            <button class="btn btn-secondary btn-block" id="ob-btn-register" style="font-size:13px">
+              New User? Create Account
             </button>
           </div>
         </div>
 
-        <!-- ==================== SCREEN 2: PREPARATION PROTOCOL ==================== -->
+        <!-- ═══════════════════ SCREEN 2: PREPARATION ═══════════════════ -->
         <div class="ob-screen" id="ob-screen-2">
-          <div class="ob-screen-header" style="margin-bottom: 12px;">
-            <h2 style="font-size: 1.35rem; color: #0E281C;">Have these ready before we begin</h2>
-            <p style="font-size: 0.8125rem;">Financial regulations require identity verification. Having these 3 items ready makes the process seamless and takes under 3 minutes.</p>
+          <div class="ob-screen-header" style="margin-bottom:12px">
+            <h2 style="font-size:1.35rem;color:#0E281C">Have these ready before we begin</h2>
+            <p style="font-size:.8125rem">SEBI regulations require identity verification. These 3 items make the process seamless.</p>
           </div>
 
-          <div style="background: #143525; color: #FFFFFF; padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 14px;">
-            <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #86EFAC; font-weight: 700; display: block;">REGULATORY REQUIREMENT</span>
-            <strong style="font-size: 0.9rem;">Official KYC Protocol</strong>
+          <div style="background:#143525;color:#FFF;padding:10px 14px;border-radius:var(--radius-sm);margin-bottom:14px">
+            <span style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#86EFAC;font-weight:700;display:block">REGULATORY REQUIREMENT</span>
+            <strong style="font-size:.9rem">Official KYC Protocol — SEBI / CKYC</strong>
           </div>
 
-          <div class="checklist-grid" style="gap: 8px; margin-bottom: 12px;">
-            <div class="checklist-item" style="padding: 10px; margin-bottom: 0;">
+          <div class="checklist-grid" style="gap:8px;margin-bottom:12px">
+            <div class="checklist-item" style="padding:10px;margin-bottom:0">
               <div class="checklist-check">✓</div>
               <div class="checklist-content">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <h4 style="font-size: 0.85rem;">Permanent Account Number (PAN)</h4>
-                  <span class="substep-badge" style="background: #F1F5F9; color: #475569;">Required</span>
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <h4 style="font-size:.85rem">PAN Card</h4>
+                  <span class="substep-badge" style="background:#F1F5F9;color:#475569">Required</span>
                 </div>
-                <p style="font-size: 0.75rem;">Physical card or 10-digit number linked to your tax record.</p>
+                <p style="font-size:.75rem">10-digit PAN linked to your income tax record. You can upload a photo or enter the number.</p>
               </div>
             </div>
 
-            <div class="checklist-item" style="padding: 10px; margin-bottom: 0;">
+            <div class="checklist-item" style="padding:10px;margin-bottom:0">
               <div class="checklist-check">✓</div>
               <div class="checklist-content">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <h4 style="font-size: 0.85rem;">Aadhaar Card Number</h4>
-                  <span class="substep-badge badge-blue">DigiLocker</span>
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <h4 style="font-size:.85rem">Aadhaar</h4>
+                  <span class="substep-badge badge-blue">DigiLocker / Upload</span>
                 </div>
-                <p style="font-size: 0.75rem;">Must have access to mobile phone linked with Aadhaar for OTP verification.</p>
+                <p style="font-size:.75rem">12-digit Aadhaar number via OTP, or upload the document. DigiLocker XML fetch also supported.</p>
               </div>
             </div>
 
-            <div class="checklist-item" style="padding: 10px; margin-bottom: 0;">
+            <div class="checklist-item" style="padding:10px;margin-bottom:0">
               <div class="checklist-check">✓</div>
               <div class="checklist-content">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <h4 style="font-size: 0.85rem;">Indian Bank Account & IFSC</h4>
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <h4 style="font-size:.85rem">Indian Bank Account</h4>
                   <span class="substep-badge badge-green">SIP Setup</span>
                 </div>
-                <p style="font-size: 0.75rem;">In your name, for setting up auto-debit SIP and withdrawals.</p>
+                <p style="font-size:.75rem">In your name. Account number + IFSC for auto-debit SIP and withdrawals.</p>
               </div>
             </div>
           </div>
 
-          <div class="gov-what-we-do" style="border-left-color: #15803D; margin-bottom: 14px;">
-            <strong>Can't finish now?</strong> Your progress saves automatically at every tap.
+          <div class="gov-what-we-do" style="border-left-color:#15803D;margin-bottom:14px">
+            <strong>Progress auto-saves</strong> at every step — return anytime to continue.
           </div>
 
-          <div class="ob-bottom-actions">
+          <div class="ob-bottom-actions" style="display:flex;flex-direction:column;gap:8px">
             <button class="btn btn-primary btn-block" id="ob-btn-checklist-ready">
-              <span>I Have These Ready • Continue</span>
+              <span>I Have These Ready · Continue</span>
               <svg class="icon-svg" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
-            <button class="save-later-link" id="ob-btn-save-later" style="margin-top: 10px;">
-              Save & Exit for Later
+            <button class="save-later-link" id="ob-btn-save-later" style="margin-top:6px">
+              Save &amp; Exit for Later
             </button>
           </div>
         </div>
 
-        <!-- ==================== SCREEN 3: PACE & DEPLOYMENT ==================== -->
+        <!-- ═══════════════════ SCREEN 3: INVESTMENT PACE ═══════════════════ -->
         <div class="ob-screen" id="ob-screen-3">
-          <div class="ob-screen-header" style="margin-bottom: 10px;">
-            <h2 style="font-size: 1.35rem; color: #0E281C;">Choose your daily or weekly pace</h2>
-            <p style="font-size: 0.8125rem;">Consistency matters more than timing. Pick an amount you won't miss.</p>
+          <div class="ob-screen-header" style="margin-bottom:10px">
+            <h2 style="font-size:1.35rem;color:#0E281C">Choose your investment pace</h2>
+            <p style="font-size:.8125rem">Consistency matters more than timing. Pick an amount you won't miss.</p>
           </div>
 
           <div class="botanical-tier-card">
             <div class="botanical-tier-icon">🌱</div>
             <div class="botanical-tier-info">
-              <h4>BOTANICAL TIER II • First Sprout</h4>
+              <h4>BOTANICAL TIER II · First Sprout</h4>
               <p>Nurturing steady habit from root to leaf.</p>
             </div>
           </div>
 
+          <!-- Frequency Tabs -->
           <div class="freq-tabs-container">
             <button class="freq-tab-btn is-active" data-freq="daily">Daily</button>
             <button class="freq-tab-btn" data-freq="weekly">Weekly</button>
             <button class="freq-tab-btn" data-freq="monthly">Monthly</button>
           </div>
 
+          <!-- Amount Cards — unit label dynamically updated by JS -->
           <div class="amount-card-grid">
             <div class="amount-card" data-amount="20">
               <div class="amount-card-left">
                 <div class="amount-icon-pill">☕</div>
                 <div class="amount-text-block">
-                  <strong>₹20 <span style="font-size: 12px; font-weight: normal; color: #536259;">/ day</span></strong>
+                  <strong>₹20 <span class="amount-card-freq-label" style="font-size:12px;font-weight:normal;color:#536259">/ day</span></strong>
                   <span class="amount-analogy-text">A cup of tea</span>
                 </div>
               </div>
@@ -329,11 +344,8 @@
               <div class="amount-card-left">
                 <div class="amount-icon-pill">🌿</div>
                 <div class="amount-text-block">
-                  <strong>
-                    ₹50 <span style="font-size: 12px; font-weight: normal; color: #536259;">/ day</span>
-                    <!-- COMPLIANCE: "Most chosen" is a fake metric if you have no real data. Removed until analytics confirm it. -->
-                  </strong>
-                  <span class="amount-analogy-text">Optimal baseline for micro-SIP</span>
+                  <strong>₹50 <span class="amount-card-freq-label" style="font-size:12px;font-weight:normal;color:#536259">/ day</span></strong>
+                  <span class="amount-analogy-text">Optimal micro-SIP baseline</span>
                 </div>
               </div>
               <div class="amount-check-bubble">✓</div>
@@ -343,7 +355,7 @@
               <div class="amount-card-left">
                 <div class="amount-icon-pill">📈</div>
                 <div class="amount-text-block">
-                  <strong>₹100 <span style="font-size: 12px; font-weight: normal; color: #536259;">/ day</span></strong>
+                  <strong>₹100 <span class="amount-card-freq-label" style="font-size:12px;font-weight:normal;color:#536259">/ day</span></strong>
                   <span class="amount-analogy-text">Steady compounding</span>
                 </div>
               </div>
@@ -351,109 +363,164 @@
             </div>
           </div>
 
+          <!-- Deployment Summary -->
           <div class="monthly-deployment-card">
             <div class="deployment-header">
               <span>MONTHLY DEPLOYMENT</span>
               <span>📅 100% Equity Index</span>
             </div>
             <h3 id="calc-deployment-heading">At ₹50 / day, you will invest ₹1,500 every month.</h3>
-            
+
             <div class="fund-preview-box">
               <span class="fund-badge-in">IN</span>
               <div class="fund-details-text">
                 <strong>Nifty 50 Index Direct Plan</strong>
-                <span>Top 50 companies in India • Direct / Zero Commission</span>
+                <span>Top 50 companies · Direct / Zero Commission</span>
               </div>
             </div>
 
-            <p style="font-size: 10px; color: #536259; line-height: 1.4;">
-              Equities fluctuate in value. Historical 10-12% market returns are for illustrative purposes and not guaranteed. Capital is at risk.
+            <p style="font-size:10px;color:#536259;line-height:1.4;margin-top:8px">
+              Equities fluctuate in value. Historical 10–12% market returns are illustrative and not guaranteed. Capital is at risk.
             </p>
           </div>
 
           <div class="ob-bottom-actions">
             <button class="btn btn-primary btn-block" id="ob-btn-pace-confirm">
-              <span>Confirm Pace & Verify KYC</span>
+              <span>Confirm Pace &amp; Verify KYC</span>
               <svg class="icon-svg" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
           </div>
         </div>
 
-        <!-- ==================== SCREEN 4: IDENTITY AUTHENTICATION & WAITING ==================== -->
+        <!-- ═══════════════════ SCREEN 4: KYC / IDENTITY ═══════════════════ -->
         <div class="ob-screen" id="ob-screen-4">
-          <div class="ob-screen-header" style="margin-bottom: 10px;">
-            <h2 style="font-size: 1.35rem; color: #0E281C;">Identity & Bank Verification</h2>
-            <p style="font-size: 0.8125rem;">Enter credentials for 100% paperless SEBI verification via NSDL & DigiLocker.</p>
+          <div class="ob-screen-header" style="margin-bottom:10px">
+            <h2 style="font-size:1.35rem;color:#0E281C">Identity &amp; Bank Verification</h2>
+            <p style="font-size:.8125rem">Enter credentials for 100% paperless SEBI verification via NSDL &amp; DigiLocker.</p>
           </div>
 
-          <!-- Interactive KYC Form -->
+          <!-- KYC Form -->
           <div class="kyc-form-card" id="kyc-input-section">
-            <div style="margin-bottom: 10px;">
+
+            <!-- 1. PAN -->
+            <div style="margin-bottom:12px">
               <div class="kyc-input-label">
-                <span>1. PERMANENT ACCOUNT NUMBER (PAN)</span>
-                <span id="pan-validation-badge" class="substep-badge badge-green" style="font-size: 10px;">VALID FORMAT</span>
+                <span>1. PAN CARD (PERMANENT ACCOUNT NUMBER)</span>
+                <span id="pan-validation-badge" class="substep-badge badge-blue" style="font-size:10px">10 chars</span>
               </div>
-              <input type="text" id="kyc-pan-input" class="kyc-input" value="ABCDE1234F" maxlength="10" placeholder="ABCDE1234F" autocomplete="off" />
-              
-              <!-- Optional Document Upload / Photo Dropzone -->
-              <label for="kyc-pan-file-input" class="kyc-upload-dropzone" id="kyc-pan-dropzone">
-                <svg class="icon-svg" style="width: 16px; height: 16px; color: #155A37;" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                <span>Upload PAN Card / Photo (Simulate AI OCR)</span>
-                <input type="file" id="kyc-pan-file-input" accept="image/*,.pdf" style="display: none;" />
+              <input type="text" id="kyc-pan-input" class="kyc-input" maxlength="10"
+                     placeholder="e.g. ABCDE1234F" autocomplete="off" style="text-transform:uppercase"/>
+
+              <!-- PAN Upload -->
+              <label for="kyc-pan-file-input" class="kyc-upload-dropzone" id="kyc-pan-dropzone" style="margin-top:6px">
+                <svg class="icon-svg" style="width:16px;height:16px;color:#155A37" viewBox="0 0 24 24">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                </svg>
+                <span>Upload PAN Card photo (optional — AI OCR)</span>
+                <input type="file" id="kyc-pan-file-input" accept="image/*,.pdf" style="display:none"/>
               </label>
-              <div id="kyc-upload-success" class="kyc-file-preview" style="display: none;">
-                <span style="display: flex; align-items: center; gap: 6px;">
-                  <svg class="icon-svg" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <div id="kyc-upload-success" class="kyc-file-preview" style="display:none">
+                <span style="display:flex;align-items:center;gap:6px">
+                  <svg class="icon-svg" style="width:14px;height:14px" viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                  </svg>
                   <strong id="kyc-uploaded-filename">pan_card.jpg</strong>
                 </span>
-                <span class="substep-badge badge-green" style="font-size: 10px;">AI Verified</span>
+                <span class="substep-badge badge-green" style="font-size:10px">AI Verified</span>
               </div>
             </div>
 
-            <div style="margin-bottom: 10px;">
+            <!-- 2. Aadhaar -->
+            <div style="margin-bottom:12px">
               <div class="kyc-input-label">
-                <span>2. AADHAAR DIGILOCKER CONSENT</span>
-                <span class="substep-badge badge-blue" style="font-size: 10px;">UIDAI READY</span>
+                <span>2. AADHAAR IDENTITY</span>
+                <span class="substep-badge badge-blue" style="font-size:10px">UIDAI</span>
               </div>
-              <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 11px; color: #334155; cursor: pointer; background: #F8FAFC; padding: 8px; border-radius: 4px; border: 1px solid #E2E8F0;">
-                <input type="checkbox" id="kyc-digilocker-consent" checked style="margin-top: 2px; accent-color: #155A37;" />
-                <span>Authorize secure DigiLocker XML retrieval linked to mobile phone •••• 8912.</span>
-              </label>
+
+              <!-- Mode Toggle -->
+              <div class="aadhaar-mode-row">
+                <button class="aadhaar-mode-btn is-active" data-mode="number">
+                  🔢 Enter 12-Digit Number
+                </button>
+                <button class="aadhaar-mode-btn" data-mode="upload">
+                  📄 Upload Aadhaar Document
+                </button>
+              </div>
+
+              <!-- Number mode -->
+              <div id="aadhaar-number-section">
+                <input type="text" id="kyc-aadhaar-input" class="kyc-input"
+                       maxlength="14" placeholder="e.g. 1234 5678 9012"
+                       autocomplete="off" inputmode="numeric"/>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+                  <span id="aadhaar-validation-badge" class="substep-badge badge-blue" style="font-size:10px">12 digits required</span>
+                  <label style="font-size:11px;color:#536259;display:flex;align-items:center;gap:4px;cursor:pointer">
+                    <input type="checkbox" id="kyc-digilocker-consent" style="accent-color:#155A37"/> 
+                    Authorize DigiLocker XML fetch
+                  </label>
+                </div>
+              </div>
+
+              <!-- Upload mode -->
+              <div id="aadhaar-upload-section" style="display:none">
+                <label for="kyc-aadhaar-file-input" class="kyc-upload-dropzone">
+                  <svg class="icon-svg" style="width:16px;height:16px;color:#155A37" viewBox="0 0 24 24">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                  </svg>
+                  <span>Upload Aadhaar Card (front &amp; back)</span>
+                  <input type="file" id="kyc-aadhaar-file-input" accept="image/*,.pdf" style="display:none"/>
+                </label>
+                <div id="kyc-aadhaar-upload-success" class="kyc-file-preview" style="display:none">
+                  <span style="display:flex;align-items:center;gap:6px">
+                    <svg class="icon-svg" style="width:14px;height:14px" viewBox="0 0 24 24">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    <strong id="kyc-aadhaar-filename">aadhaar.pdf</strong>
+                  </span>
+                  <span class="substep-badge badge-green" style="font-size:10px">Uploaded</span>
+                </div>
+              </div>
             </div>
 
+            <!-- 3. Bank Account -->
             <div>
               <div class="kyc-input-label">
-                <span>3. BANK ACCOUNT FOR PENNY-DROP (IMPS)</span>
-                <span id="bank-status-badge" class="substep-badge badge-blue" style="font-size: 10px;">HDFC BANK RESOLVED</span>
+                <span>3. BANK ACCOUNT (PENNY-DROP VERIFICATION)</span>
+                <span id="bank-status-badge" class="substep-badge badge-blue" style="font-size:10px">Enter IFSC</span>
               </div>
-              <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 6px;">
-                <input type="text" id="kyc-bank-acc-input" class="kyc-input" value="50100482190123" placeholder="Account Number" />
-                <input type="text" id="kyc-bank-ifsc-input" class="kyc-input" value="HDFC0001234" placeholder="IFSC Code" />
+              <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:6px">
+                <input type="text" id="kyc-bank-acc-input" class="kyc-input"
+                       placeholder="Account Number" autocomplete="off" inputmode="numeric"/>
+                <input type="text" id="kyc-bank-ifsc-input" class="kyc-input"
+                       placeholder="IFSC Code" autocomplete="off" style="text-transform:uppercase" maxlength="11"/>
               </div>
+              <p style="font-size:10px;color:#536259;margin-top:4px">₹1.00 IMPS penny-drop verifies legal account holder name.</p>
             </div>
           </div>
 
-          <!-- Live Verification Progress Card -->
-          <div class="verification-substeps-card" style="margin-bottom: 10px;">
+          <!-- Live Verification Progress -->
+          <div class="verification-substeps-card" style="margin-bottom:10px">
             <div class="substep-row">
-              <div class="substep-icon-status substep-status-verified" id="substep-pan-icon">✓</div>
+              <div class="substep-icon-status substep-status-inprogress" id="substep-pan-icon"></div>
               <div class="substep-info">
                 <div class="substep-header">
                   <h4>PAN Status</h4>
-                  <span class="substep-badge badge-green" id="substep-pan-badge">Verified</span>
+                  <span class="substep-badge badge-blue" id="substep-pan-badge">Pending</span>
                 </div>
-                <p id="substep-pan-text">PAN: ABCDE1234F verified via NSDL record</p>
+                <p id="substep-pan-text">Enter PAN above to verify via NSDL</p>
               </div>
             </div>
 
             <div class="substep-row">
-              <div class="substep-icon-status substep-status-verified" id="substep-aadhaar-icon">✓</div>
+              <div class="substep-icon-status substep-status-inprogress" id="substep-aadhaar-icon"></div>
               <div class="substep-info">
                 <div class="substep-header">
-                  <h4>Aadhaar DigiLocker</h4>
-                  <span class="substep-badge badge-green" id="substep-aadhaar-badge">Verified</span>
+                  <h4>Aadhaar / DigiLocker</h4>
+                  <span class="substep-badge badge-blue" id="substep-aadhaar-badge">Pending</span>
                 </div>
-                <p>Linked securely to phone ending in •••• 8912</p>
+                <p>Verification via UIDAI / DigiLocker secure gateway</p>
               </div>
             </div>
 
@@ -462,14 +529,14 @@
               <div class="substep-info">
                 <div class="substep-header">
                   <h4>Bank Penny-Drop</h4>
-                  <span class="substep-badge badge-blue" id="substep-ckyc-badge">Ready to Verify</span>
+                  <span class="substep-badge badge-blue" id="substep-ckyc-badge">Ready</span>
                 </div>
-                <p id="substep-bank-desc">Deposit ₹1.00 via IMPS to verify legal account holder name</p>
+                <p id="substep-bank-desc">₹1.00 IMPS confirms legal account holder name</p>
               </div>
             </div>
           </div>
 
-          <!-- Government Repositories Heartbeat Card -->
+          <!-- Verification Progress Card -->
           <div class="gov-repo-card" id="kyc-waiting-card">
             <div class="gov-repo-top">
               <div class="gov-bank-icon">
@@ -487,7 +554,7 @@
                 <span id="kyc-elapsed-timer">00:00 elapsed</span>
               </div>
               <div class="exchange-progress-bar">
-                <div class="exchange-progress-fill" id="kyc-exchange-fill" style="width: 25%;"></div>
+                <div class="exchange-progress-fill" id="kyc-exchange-fill" style="width:0%"></div>
               </div>
               <div class="exchange-milestones">
                 <span class="exchange-milestone is-done">Request Dispatched</span>
@@ -497,104 +564,111 @@
             </div>
 
             <div class="gov-what-we-do" id="kyc-heartbeat-msg">
-              <strong>What we are doing:</strong> Checking your Central KYC Registry (CKYC) status and matching your bank account name via penny-drop confirmation.
+              <strong>What we do:</strong> Check Central KYC Registry (CKYC) status, verify PAN via NSDL, authenticate Aadhaar via DigiLocker, and confirm bank account via penny-drop.
             </div>
 
             <div class="gov-ref-tag">
-              <span>● 256-bit TLS Gateway Encrypted</span>
+              <span>● 256-bit TLS Encrypted</span>
               <span>REF: CKYC-9042-M</span>
             </div>
           </div>
 
           <div class="ob-bottom-actions">
-            <!-- Initial Action: Run Verification -->
+            <!-- Initial Action -->
             <button class="btn btn-primary btn-block" id="ob-btn-run-verification">
               <svg class="icon-svg" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 0 0 1.946-.806 3.42 3.42 0 0 1 4.438 0 3.42 3.42 0 0 0 1.946.806 3.42 3.42 0 0 1 3.138 3.138 3.42 3.42 0 0 0 .806 1.946 3.42 3.42 0 0 1 0 4.438 3.42 3.42 0 0 0-.806 1.946 3.42 3.42 0 0 1-3.138 3.138 3.42 3.42 0 0 0-1.946.806 3.42 3.42 0 0 1-4.438 0 3.42 3.42 0 0 0-1.946-.806 3.42 3.42 0 0 1-3.138-3.138 3.42 3.42 0 0 0-.806-1.946 3.42 3.42 0 0 1 0-4.438 3.42 3.42 0 0 0 .806-1.946 3.42 3.42 0 0 1 3.138-3.138z"/></svg>
-              <span>Verify Credentials & Run Penny-Drop</span>
+              <span>Verify Credentials &amp; Run Penny-Drop</span>
             </button>
 
-            <!-- Spinner State during verification -->
-            <button class="btn btn-primary btn-block" id="ob-btn-checking-status" style="display: none; pointer-events: none;">
-              <svg class="icon-svg" style="animation: spin 1s linear infinite;" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg>
-              <span>Checking Registry & IMPS Rail...</span>
+            <!-- Checking spinner -->
+            <button class="btn btn-primary btn-block" id="ob-btn-checking-status"
+                    style="display:none;pointer-events:none">
+              <svg class="icon-svg" style="animation:spin 1s linear infinite" viewBox="0 0 24 24">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/>
+              </svg>
+              <span>Checking Registry &amp; IMPS Rail…</span>
             </button>
-            <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+            <style>@keyframes spin{100%{transform:rotate(360deg)}}</style>
 
-            <!-- Completed State -->
-            <div id="kyc-verified-box" style="display: none; margin-bottom: 8px;">
+            <!-- Verified -->
+            <div id="kyc-verified-box" style="display:none;margin-bottom:8px">
               <button class="btn btn-primary btn-block" id="ob-btn-kyc-proceed">
-                <span>KYC Verified • Proceed to Mandate</span>
+                <span>KYC Verified · Proceed to Mandate</span>
                 <svg class="icon-svg" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </button>
             </div>
 
-            <button class="btn btn-secondary btn-block" id="ob-btn-kyc-background" style="margin-top: 8px; font-size: 13px;">
-              💬 Continue in Background (Notify via SMS)
+            <button class="btn btn-secondary btn-block" id="ob-btn-kyc-background"
+                    style="margin-top:8px;font-size:13px">
+              💬 Continue in Background (SMS notification)
             </button>
           </div>
         </div>
 
-        <!-- ==================== SCREEN 5: MILESTONE ACHIEVED & MANDATE ==================== -->
+        <!-- ═══════════════════ SCREEN 5: SUCCESS ═══════════════════ -->
         <div class="ob-screen" id="ob-screen-5">
-          <div style="text-align: center; margin-bottom: 14px;">
-            <span class="substep-badge" style="background: #E0E7FF; color: #3730A3; font-size: 11px;">Milestone Achieved</span>
-            <div style="margin: 8px 0;">
-              <span style="font-size: 12px; font-weight: 700; color: #15803D; background: #DCFCE7; padding: 4px 12px; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 6px;">
-                <svg class="icon-svg" style="width: 14px; height: 14px; color: #15803D;" viewBox="0 0 24 24"><path d="M12 22v-9M12 13a5 5 0 0 0-5-5c0 4 2 7 5 7M12 10a5 5 0 0 1 5-5c0 4-2 7-5 7"/></svg>
+          <div style="text-align:center;margin-bottom:14px">
+            <span class="substep-badge" style="background:#E0E7FF;color:#3730A3;font-size:11px">Milestone Achieved</span>
+            <div style="margin:8px 0">
+              <span style="font-size:12px;font-weight:700;color:#15803D;background:#DCFCE7;padding:4px 12px;border-radius:var(--radius-sm);display:inline-flex;align-items:center;gap:6px">
+                <svg class="icon-svg" style="width:14px;height:14px;color:#15803D" viewBox="0 0 24 24">
+                  <path d="M12 22v-9M12 13a5 5 0 0 0-5-5c0 4 2 7 5 7M12 10a5 5 0 0 1 5-5c0 4-2 7-5 7"/>
+                </svg>
                 First Sprout Planted
-                <svg class="icon-svg" style="width: 14px; height: 14px; color: #15803D;" viewBox="0 0 24 24"><path d="M12 22v-9M12 13a5 5 0 0 0-5-5c0 4 2 7 5 7M12 10a5 5 0 0 1 5-5c0 4-2 7-5 7"/></svg>
               </span>
             </div>
-            <h2 style="font-size: 1.35rem; color: #0E281C; line-height: 1.25; margin-bottom: 4px;">
-              Your daily SIP is officially set up!
+            <h2 style="font-size:1.35rem;color:#0E281C;line-height:1.25;margin-bottom:4px">
+              Your SIP is officially set up!
             </h2>
-            <p style="font-size: 0.8125rem; color: #536259; line-height: 1.4;">
-              A steady seed planted today. Your discipline begins silently compounding through patient, systematic stewardship.
+            <p style="font-size:.8125rem;color:#536259;line-height:1.4">
+              Your discipline begins silently compounding — patient, systematic, automated.
             </p>
           </div>
 
           <div class="mandate-summary-card">
             <div class="mandate-header">
               <h4>
-                <svg class="icon-svg" style="color: #155A37;" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                Mandate & Order Summary
+                <svg class="icon-svg" style="color:#155A37" viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                Mandate &amp; Order Summary
               </h4>
-              <!-- COMPLIANCE: "NPCI Active" label on a simulator screen is misleading. Labeled as sample data. -->
-              <span class="badge-npci" style="background: #F1F5F9; color: #64748B; border: 1px solid #CBD5E1;">NPCI Active (Sample Data)</span>
             </div>
 
             <div class="mandate-row">
-              <span class="mandate-label">Daily Commitment</span>
+              <span class="mandate-label">Commitment</span>
               <span class="mandate-value" id="summary-daily-commitment">₹50 / day</span>
             </div>
             <div class="mandate-row">
               <span class="mandate-label">Fund Selected</span>
-              <span class="mandate-value">Bandhan Nifty 50 Index Fund<br><small style="color: #15803D; font-weight: normal;">Direct-Growth • Zero Platform Fee</small></span>
+              <span class="mandate-value">Bandhan Nifty 50 Index Fund<br>
+                <small style="color:#15803D;font-weight:normal">Direct-Growth · Zero Platform Fee</small></span>
             </div>
             <div class="mandate-row">
-              <span class="mandate-label">Auto-Debit Route</span>
-              <span class="mandate-value">HDFC Bank ••4821 via e-NACH</span>
+              <span class="mandate-label">Auto-Debit</span>
+              <span class="mandate-value" id="summary-bank-display">Bank Account (verified)</span>
             </div>
             <div class="mandate-row">
-              <span class="mandate-label">First Scheduled Debit</span>
-              <span class="mandate-value">Tomorrow, 09:30 AM IST</span>
+              <span class="mandate-label">First Debit</span>
+              <span class="mandate-value">Next business day, 09:30 AM IST</span>
             </div>
             <div class="mandate-row">
-              <span class="mandate-label">Estimated Allotment</span>
+              <span class="mandate-label">Allotment</span>
               <span class="mandate-value">Within T+1 Business Days</span>
             </div>
           </div>
 
           <div class="micro-value-grid">
             <div class="micro-value-card">
-              <div style="color: #155A37; font-size: 16px; margin-bottom: 2px;">⚡</div>
+              <div style="color:#155A37;font-size:16px;margin-bottom:2px">⚡</div>
               <h5>1-Tap Control</h5>
-              <p>Pause, modify, or stop your SIP anytime with zero friction.</p>
+              <p>Pause, modify, or stop your SIP anytime.</p>
             </div>
             <div class="micro-value-card">
-              <div style="color: #155A37; font-size: 16px; margin-bottom: 2px;">🛡</div>
+              <div style="color:#155A37;font-size:16px;margin-bottom:2px">🛡</div>
               <h5>Zero Hidden Cost</h5>
-              <p>No entry loads, no exit penalties, no distributor cuts.</p>
+              <p>No entry loads, no exit penalties, no cuts.</p>
             </div>
           </div>
 
@@ -607,106 +681,134 @@
             </div>
           </div>
 
-          <div class="ob-bottom-actions">
+          <div class="ob-bottom-actions" style="display:flex;flex-direction:column;gap:8px">
             <button class="btn btn-primary btn-block" id="ob-btn-go-portfolio">
-              <span>Go to Your Portfolio</span>
+              <span>View Your Portfolio</span>
               <svg class="icon-svg" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
-            <button class="btn btn-secondary btn-block" id="ob-btn-download-pdf" style="margin-top: 8px; font-size: 13px;">
+            <button class="btn btn-secondary btn-block" id="ob-btn-download-pdf" style="font-size:13px">
               <svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
               <span>Download Mandate Confirmation (PDF)</span>
             </button>
           </div>
         </div>
 
-      </div>
+      </div><!-- /phone-screen-content -->
 
-      <!-- In-App Interactive Toast -->
+      <!-- ═══ TOAST ═══ -->
       <div id="app-toast" class="app-toast">
-        <svg class="icon-svg" style="width: 16px; height: 16px; color: #86EFAC;" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        <span id="app-toast-msg">Notification message</span>
+        <svg class="icon-svg" style="width:16px;height:16px;color:#86EFAC;flex-shrink:0" viewBox="0 0 24 24">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <span id="app-toast-msg">Notification</span>
       </div>
 
-      <!-- Phone + OTP Authentication Modal -->
+      <!-- ═══ AUTH MODAL ═══ -->
       <div id="modal-auth" class="modal-backdrop">
         <div class="modal-sheet">
           <div class="modal-handle"></div>
           <div class="modal-header-row">
             <div>
-              <h3 style="font-size: 1.15rem; color: #0E281C;">Sign In to Sprout</h3>
-              <p style="font-size: 0.75rem; color: #64748B;">Enter your 10-digit mobile number for paperless access.</p>
+              <h3 id="auth-modal-title" style="font-size:1.15rem;color:#0E281C">Sign In to Sprout</h3>
+              <p id="auth-modal-subtitle" style="font-size:.75rem;color:#64748B">
+                Enter your 10-digit mobile number for OTP access.
+              </p>
             </div>
             <button id="btn-close-auth-modal" class="modal-close-btn" aria-label="Close">✕</button>
           </div>
 
-          <!-- Step A: Phone Number -->
+          <!-- Step A: Phone -->
           <div id="auth-step-phone">
-            <label class="kyc-input-label" style="margin-bottom: 6px;">
-              <span>MOBILE NUMBER (INDIAN RESIDENT)</span>
+            <!-- Name field (registration only) -->
+            <div id="auth-name-row" class="auth-name-field" style="display:none">
+              <label for="auth-name-input">FULL NAME</label>
+              <input type="text" id="auth-name-input" class="kyc-input"
+                     placeholder="As per PAN card" autocomplete="name"/>
+            </div>
+
+            <label class="kyc-input-label" style="margin-bottom:6px">
+              <span>MOBILE NUMBER</span>
               <span class="substep-badge badge-blue">OTP LOGIN</span>
             </label>
-            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-              <span style="background: #F1F5F9; border: 1px solid #CBD5E1; padding: 10px 12px; border-radius: 4px; font-weight: 700; font-size: 13px; color: #334155;">+91</span>
-              <input type="tel" id="auth-phone-input" class="kyc-input" maxlength="10" value="9876543210" placeholder="9876543210" style="text-transform: none; font-size: 14px;" />
+            <div style="display:flex;gap:8px;margin-bottom:12px">
+              <span style="background:#F1F5F9;border:1px solid #CBD5E1;padding:10px 12px;border-radius:4px;font-weight:700;font-size:13px;color:#334155">+91</span>
+              <input type="tel" id="auth-phone-input" class="kyc-input"
+                     maxlength="10" placeholder="10-digit mobile number"
+                     inputmode="numeric" autocomplete="tel"/>
             </div>
             <button class="btn btn-primary btn-block" id="btn-send-otp">
               <span>Send 6-Digit OTP</span>
               <svg class="icon-svg" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
+
+            <div class="auth-switch-row">
+              <span id="auth-login-hint">New here?
+                <button id="btn-switch-to-register">Create Account</button>
+              </span>
+              <span id="auth-register-hint" style="display:none">Already registered?
+                <button id="btn-switch-to-login">Sign In</button>
+              </span>
+            </div>
           </div>
 
-          <!-- Step B: OTP Input -->
-          <div id="auth-step-otp" style="display: none;">
-            <p style="font-size: 0.8125rem; color: #334155; text-align: center;">
-              Enter the 6-digit code sent to <strong id="auth-display-phone">+91 98765 43210</strong>
+          <!-- Step B: OTP -->
+          <div id="auth-step-otp" style="display:none">
+            <p style="font-size:.8125rem;color:#334155;text-align:center;margin-bottom:10px">
+              Enter the 6-digit code sent to <strong id="auth-display-phone">your number</strong>
             </p>
-            <div class="otp-box-grid">
-              <input type="text" maxlength="1" class="otp-digit-input" data-index="0" value="8" />
-              <input type="text" maxlength="1" class="otp-digit-input" data-index="1" value="4" />
-              <input type="text" maxlength="1" class="otp-digit-input" data-index="2" value="9" />
-              <input type="text" maxlength="1" class="otp-digit-input" data-index="3" value="2" />
-              <input type="text" maxlength="1" class="otp-digit-input" data-index="4" value="0" />
-              <input type="text" maxlength="1" class="otp-digit-input" data-index="5" value="1" />
+
+            <div class="otp-hint-banner">
+              💡 <span>For demo: OTP will appear in the notification above.</span>
             </div>
 
-            <div style="text-align: center; margin-bottom: 14px;">
-              <button id="btn-use-demo-otp" style="background: #EBF5EE; border: 1px solid #BBF7D0; color: #15803D; font-size: 11px; padding: 4px 10px; border-radius: 12px; cursor: pointer; font-weight: 600;">
-                💡 Auto-fill Demo Code (849201)
+            <div class="otp-box-grid">
+              <input type="text" maxlength="1" class="otp-digit-input" data-index="0" inputmode="numeric"/>
+              <input type="text" maxlength="1" class="otp-digit-input" data-index="1" inputmode="numeric"/>
+              <input type="text" maxlength="1" class="otp-digit-input" data-index="2" inputmode="numeric"/>
+              <input type="text" maxlength="1" class="otp-digit-input" data-index="3" inputmode="numeric"/>
+              <input type="text" maxlength="1" class="otp-digit-input" data-index="4" inputmode="numeric"/>
+              <input type="text" maxlength="1" class="otp-digit-input" data-index="5" inputmode="numeric"/>
+            </div>
+
+            <div style="text-align:center;margin-bottom:14px">
+              <button id="btn-use-demo-otp"
+                style="background:#EBF5EE;border:1px solid #BBF7D0;color:#15803D;font-size:11px;padding:4px 10px;border-radius:12px;cursor:pointer;font-weight:600">
+                Auto-fill Demo OTP
               </button>
             </div>
 
             <button class="btn btn-primary btn-block" id="btn-verify-otp">
-              <span>Verify & Continue</span>
+              <span>Verify &amp; Continue</span>
               <svg class="icon-svg" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
-            <button id="btn-back-to-phone" class="btn btn-ghost btn-block" style="margin-top: 6px; font-size: 12px;">
-              Change phone number
+            <button id="btn-back-to-phone" class="btn btn-ghost btn-block" style="margin-top:6px;font-size:12px">
+              ← Change phone number
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Investor Profile & Portfolio Modal -->
+      <!-- ═══ PROFILE MODAL ═══ -->
       <div id="modal-profile" class="modal-backdrop">
         <div class="modal-sheet">
           <div class="modal-handle"></div>
           <div class="modal-header-row">
             <div>
-              <span class="substep-badge badge-green" style="font-size: 10px; margin-bottom: 2px;">SEBI COMPLIANT INVESTOR</span>
-              <h3 style="font-size: 1.2rem; color: #0E281C;">Investor Profile</h3>
+              <span class="substep-badge badge-green" style="font-size:10px;margin-bottom:2px">SEBI COMPLIANT INVESTOR</span>
+              <h3 style="font-size:1.2rem;color:#0E281C">Investor Profile</h3>
             </div>
             <button id="btn-close-profile-modal" class="modal-close-btn" aria-label="Close">✕</button>
           </div>
 
-          <!-- Profile Details Card -->
+          <!-- Profile Details -->
           <div class="profile-stat-card">
             <div class="profile-row">
               <span class="profile-row-label">Investor Name</span>
-              <span class="profile-row-val" id="profile-name">Disciplined Investor</span>
+              <span class="profile-row-val" id="profile-name">—</span>
             </div>
             <div class="profile-row">
               <span class="profile-row-label">Registered Phone</span>
-              <span class="profile-row-val" id="profile-phone">+91 98765 43210</span>
+              <span class="profile-row-val" id="profile-phone">—</span>
             </div>
             <div class="profile-row">
               <span class="profile-row-label">CKYC Status</span>
@@ -714,71 +816,85 @@
             </div>
             <div class="profile-row">
               <span class="profile-row-label">Linked PAN</span>
-              <span class="profile-row-val" id="profile-pan-val">ABCDE••••F (NSDL Verified)</span>
+              <span class="profile-row-val" id="profile-pan-val">Not yet submitted</span>
             </div>
             <div class="profile-row">
               <span class="profile-row-label">Auto-Debit Bank</span>
-              <span class="profile-row-val">HDFC Bank ••••4821 (e-NACH Active)</span>
+              <span class="profile-row-val" id="profile-bank-val">—</span>
             </div>
           </div>
 
-          <!-- Active Portfolio & SIP -->
-          <div style="background: #143525; color: #FFFFFF; padding: 12px 14px; border-radius: var(--radius-sm); margin-bottom: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <span style="font-size: 11px; text-transform: uppercase; color: #86EFAC; font-weight: 700;">ACTIVE INVESTMENT</span>
-              <span class="substep-badge badge-green" style="font-size: 10px;">DAILY MICRO-SIP</span>
+          <!-- Active Investment -->
+          <div style="background:#143525;color:#FFF;padding:12px 14px;border-radius:var(--radius-sm);margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span style="font-size:11px;text-transform:uppercase;color:#86EFAC;font-weight:700">ACTIVE INVESTMENT</span>
+              <span class="substep-badge badge-green" style="font-size:10px" id="profile-freq-badge">MICRO-SIP</span>
             </div>
-            <div style="font-size: 1.35rem; font-weight: 700;">₹100 <small style="font-size: 0.8rem; font-weight: normal; opacity: 0.85;">/ day</small></div>
-            <p style="font-size: 11px; color: #A7F3D0; margin-top: 4px;">Bandhan Nifty 50 Index Fund (Direct-Growth). Next debit: Tomorrow at 09:30 AM.</p>
+            <div style="font-size:1.35rem;font-weight:700" id="profile-amount-display">
+              — <small style="font-size:.8rem;font-weight:normal;opacity:.85">/ day</small>
+            </div>
+            <p style="font-size:11px;color:#A7F3D0;margin-top:4px">
+              Bandhan Nifty 50 Index Fund (Direct-Growth). Next debit: next business day at 09:30 AM.
+            </p>
           </div>
 
-          <!-- Document Locker Downloads -->
-          <h4 style="font-size: 0.85rem; color: #0E281C; margin: 12px 0 6px;">DOCUMENT LOCKER</h4>
-          <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
-            <button class="btn btn-secondary btn-block" id="btn-download-profile-mandate" style="justify-content: space-between; font-size: 12px; padding: 8px 12px;">
-              <span style="display: flex; align-items: center; gap: 6px;">
-                <svg class="icon-svg" style="width: 14px; height: 14px; color: #155A37;" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                Mandate Confirmation Slip (PDF)
+          <!-- Document Locker -->
+          <h4 style="font-size:.85rem;color:#0E281C;margin:12px 0 6px">DOCUMENT LOCKER</h4>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">
+            <button class="btn btn-secondary btn-block" id="btn-download-profile-mandate"
+                    style="justify-content:space-between;font-size:12px;padding:8px 12px">
+              <span style="display:flex;align-items:center;gap:6px">
+                <svg class="icon-svg" style="width:14px;height:14px;color:#155A37" viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                Mandate Confirmation Slip (HTML/PDF)
               </span>
-              <span style="color: #155A37; font-weight: 700;">Download ↓</span>
+              <span style="color:#155A37;font-weight:700">Download ↓</span>
             </button>
-            <button class="btn btn-secondary btn-block" id="btn-download-profile-statement" style="justify-content: space-between; font-size: 12px; padding: 8px 12px;">
-              <span style="display: flex; align-items: center; gap: 6px;">
-                <svg class="icon-svg" style="width: 14px; height: 14px; color: #155A37;" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                Statement of Account (CAS)
+            <button class="btn btn-secondary btn-block" id="btn-download-profile-statement"
+                    style="justify-content:space-between;font-size:12px;padding:8px 12px">
+              <span style="display:flex;align-items:center;gap:6px">
+                <svg class="icon-svg" style="width:14px;height:14px;color:#155A37" viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                Consolidated Account Statement (CAS)
               </span>
-              <span style="color: #155A37; font-weight: 700;">Download ↓</span>
+              <span style="color:#155A37;font-weight:700">Download ↓</span>
             </button>
           </div>
 
-          <button id="btn-profile-logout" class="btn btn-ghost btn-block" style="color: #DC2626; font-size: 12px;">
+          <button id="btn-profile-logout" class="btn btn-ghost btn-block"
+                  style="color:#DC2626;font-size:12px">
             Sign Out / Switch Number
           </button>
         </div>
       </div>
 
-      <!-- Phone In-App Bottom Compliance Bar -->
-      <div class="compliance-disclaimer-strip" style="font-size: 11px; padding: 6px 10px;">
+      <!-- Compliance Strip -->
+      <div class="compliance-disclaimer-strip" style="font-size:11px;padding:6px 10px">
         <span data-i18n="complianceShort">Mutual fund investments are subject to market risks. Read all scheme documents carefully.</span>
       </div>
-    </div>
+    </div><!-- /phone-mockup-frame -->
   </main>
 
-  <!-- Sticky Global Compliance Disclaimer Bar -->
+  <!-- Global Compliance Bar -->
   <aside class="compliance-disclaimer-strip compliance-sticky-bottom" aria-label="Regulatory risk disclosure">
-    <div style="max-width: 800px; margin: 0 auto;">
+    <div style="max-width:800px;margin:0 auto">
       <span data-i18n="complianceDisclaimer">
-      <!-- COMPLIANCE: Replace [ARN-PLACEHOLDER] with your real AMFI ARN before going live -->
-      Mutual fund investments are subject to market risks. Read all scheme-related documents carefully before investing. Sprout Technologies Pvt. Ltd. is a SEBI-registered mutual fund distributor (ARN: [ARN-PLACEHOLDER]). Past performance is not an indicator of future returns.
+        Mutual fund investments are subject to market risks. Read all scheme-related documents carefully before investing.
+        Sprout Technologies Pvt. Ltd. is a SEBI-registered mutual fund distributor (ARN: [ARN-PLACEHOLDER]).
+        Past performance is not an indicator of future returns.
       </span>
     </div>
   </aside>
 
-  <!-- Developer Telemetry Inspector -->
+  <!-- Telemetry Inspector -->
   <div class="telemetry-inspector is-collapsed" id="telemetry-inspector">
     <div class="telemetry-header" id="toggle-telemetry-btn">
-      <span>Funnel Telemetry Inspector</span>
-      <span>▲ Click to view</span>
+      <span>Funnel Telemetry</span>
+      <span>▲ View</span>
     </div>
     <div class="telemetry-body" id="telemetry-log-content"></div>
   </div>
@@ -789,65 +905,67 @@
   <script src="js/onboarding.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      // Initialize Mascot mount
-      const obMascotMount = document.getElementById("onboarding-mascot-mount");
-      if (obMascotMount) {
-        obMascotMount.innerHTML = window.SproutMascot.render("idle");
+      // Init mascot
+      const mascotMount = document.getElementById("onboarding-mascot-mount");
+      if (mascotMount && window.SproutMascot) {
+        mascotMount.innerHTML = window.SproutMascot.render("idle");
       }
 
-      // Initialize Onboarding Flow
+      // Init onboarding
       if (!window.sproutOnboarding && window.OnboardingFlow) {
         window.sproutOnboarding = new window.OnboardingFlow();
         window.sproutOnboarding.init();
       }
 
-      // Language Switcher
+      // Language switcher
       function updateLanguage(lang) {
-        const strings = window.SPROUT_STRINGS[lang] || window.SPROUT_STRINGS.en;
-        document.querySelectorAll("[data-i18n]").forEach(elem => {
-          const key = elem.getAttribute("data-i18n");
-          if (strings[key]) {
-            elem.textContent = strings[key];
-          }
+        const strings = window.SPROUT_STRINGS && (window.SPROUT_STRINGS[lang] || window.SPROUT_STRINGS.en);
+        if (!strings) return;
+        document.querySelectorAll("[data-i18n]").forEach(el => {
+          const key = el.getAttribute("data-i18n");
+          if (strings[key]) el.textContent = strings[key];
         });
         document.querySelectorAll(".lang-btn").forEach(btn => {
           btn.classList.toggle("is-active", btn.getAttribute("data-lang") === lang);
         });
         document.documentElement.lang = lang;
       }
-
       document.querySelectorAll(".lang-btn").forEach(btn => {
         btn.addEventListener("click", () => {
-          const selected = btn.getAttribute("data-lang");
-          updateLanguage(selected);
-          window.sproutAnalytics.track("language_switched", { language: selected });
+          updateLanguage(btn.getAttribute("data-lang"));
+          window.sproutAnalytics && window.sproutAnalytics.track("language_switched", { language: btn.getAttribute("data-lang") });
         });
       });
 
-      // Telemetry drawer
+      // Auth switch buttons visibility
+      document.getElementById("btn-switch-to-register")?.addEventListener("click", () => {
+        document.getElementById("auth-login-hint").style.display    = "none";
+        document.getElementById("auth-register-hint").style.display = "inline";
+      });
+      document.getElementById("btn-switch-to-login")?.addEventListener("click", () => {
+        document.getElementById("auth-login-hint").style.display    = "inline";
+        document.getElementById("auth-register-hint").style.display = "none";
+      });
+
+      // Telemetry
       const telemetryDrawer = document.getElementById("telemetry-log-content");
-      if (telemetryDrawer) {
-        window.sproutAnalytics.onEvent((eventData) => {
+      if (telemetryDrawer && window.sproutAnalytics) {
+        window.sproutAnalytics.onEvent((ev) => {
           const entry = document.createElement("div");
           entry.className = "telemetry-item";
           entry.innerHTML = `
-            <span class="telemetry-time">${eventData.timestamp.split("T")[1].replace("Z", "")}</span>
-            <strong>${eventData.event}</strong>
-            <code>${JSON.stringify(eventData.properties)}</code>
-          `;
+            <span class="telemetry-time">${ev.timestamp.split("T")[1].replace("Z","")}</span>
+            <strong>${ev.event}</strong>
+            <code>${JSON.stringify(ev.properties)}</code>`;
           telemetryDrawer.prepend(entry);
         });
       }
 
-      const toggleTelBtn = document.getElementById("toggle-telemetry-btn");
-      if (toggleTelBtn) {
-        toggleTelBtn.addEventListener("click", () => {
-          const drawer = document.getElementById("telemetry-inspector");
-          if (drawer) drawer.classList.toggle("is-collapsed");
-        });
-      }
+      document.getElementById("toggle-telemetry-btn")?.addEventListener("click", () => {
+        document.getElementById("telemetry-inspector")?.classList.toggle("is-collapsed");
+      });
 
-      window.sproutAnalytics.track("app_opened");
+      window.sproutAnalytics && window.sproutAnalytics.track("app_opened");
     });
   </script>
 </body>

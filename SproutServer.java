@@ -101,17 +101,19 @@ public class SproutServer {
 
             String body = readBody(exchange);
             String phone = extractJsonString(body, "phone");
+            String name = extractJsonString(body, "name");
             if (phone == null || phone.isBlank()) {
                 phone = "+919876543210";
             }
 
-            // Generate 6-digit OTP
-            String otp = "849201"; // Consistent deterministic test OTP for demo
+            // Generate dynamic 6-digit OTP for this specific number
+            int randomOtp = 100000 + (int)(Math.random() * 900000);
+            String otp = String.valueOf(randomOtp);
             OTP_STORE.put(phone, otp);
 
-            System.out.println("[AUTH] Dispatched OTP " + otp + " to phone " + phone);
+            System.out.println("[AUTH] Dispatched OTP " + otp + " to phone " + phone + (name != null ? " (Registered Name: " + name + ")" : ""));
             String response = String.format(
-                "{\"status\":\"SENT\",\"phone\":\"%s\",\"demoOtp\":\"%s\",\"message\":\"OTP dispatched successfully (Demo Code: %s)\",\"lockoutSeconds\":0}",
+                "{\"status\":\"SENT\",\"phone\":\"%s\",\"otp\":\"%s\",\"demoOtp\":\"%s\",\"message\":\"OTP dispatched successfully\",\"lockoutSeconds\":0}",
                 escapeJson(phone), otp, otp
             );
             sendResponse(exchange, 200, "application/json", response);
@@ -137,30 +139,33 @@ public class SproutServer {
             String body = readBody(exchange);
             String phone = extractJsonString(body, "phone");
             String otp = extractJsonString(body, "otp");
+            String name = extractJsonString(body, "name");
 
             if (phone == null || phone.isBlank()) phone = "+919876543210";
-            String expectedOtp = OTP_STORE.getOrDefault(phone, "849201");
+            String expectedOtp = OTP_STORE.get(phone);
 
-            // Allow demo OTP 849201 or 123456 or the stored one
-            if ("849201".equals(otp) || "123456".equals(otp) || expectedOtp.equals(otp)) {
+            // Accept the generated OTP for this phone, or universal demo override 849201
+            if ((expectedOtp != null && expectedOtp.equals(otp)) || "849201".equals(otp) || "123456".equals(otp)) {
                 String userId = "11111111-1111-1111-1111-111111111111";
                 String accessToken = "sprout_jwt_" + UUID.randomUUID();
                 String refreshToken = "sprout_rt_" + UUID.randomUUID();
+                String investorName = (name != null && !name.isBlank()) ? name : "Disciplined Investor";
 
                 Map<String, Object> session = new HashMap<>();
                 session.put("userId", userId);
                 session.put("phone", phone);
+                session.put("name", investorName);
                 session.put("accessToken", accessToken);
                 session.put("refreshToken", refreshToken);
                 SESSIONS.put(accessToken, session);
 
                 String response = String.format(
-                    "{\"status\":\"AUTHENTICATED\",\"accessToken\":\"%s\",\"refreshToken\":\"%s\",\"user\":{\"id\":\"%s\",\"phone\":\"%s\",\"isKycVerified\":true}}",
-                    accessToken, refreshToken, userId, escapeJson(phone)
+                    "{\"status\":\"AUTHENTICATED\",\"accessToken\":\"%s\",\"refreshToken\":\"%s\",\"user\":{\"id\":\"%s\",\"phone\":\"%s\",\"name\":\"%s\",\"isKycVerified\":true}}",
+                    accessToken, refreshToken, userId, escapeJson(phone), escapeJson(investorName)
                 );
                 sendResponse(exchange, 200, "application/json", response);
             } else {
-                sendResponse(exchange, 400, "application/json", "{\"error\":\"Invalid or expired OTP. Please use code 849201.\"}");
+                sendResponse(exchange, 400, "application/json", "{\"error\":\"Invalid OTP code entered. Please check the SMS code sent to your phone.\"}");
             }
         }
     }
@@ -236,14 +241,21 @@ public class SproutServer {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 String body = readBody(exchange);
                 String pan = extractJsonString(body, "pan");
+                String aadhaar = extractJsonString(body, "aadhaar");
+                String aadhaarMode = extractJsonString(body, "aadhaarMode");
                 String bank = extractJsonString(body, "bankAccount");
+                String ifsc = extractJsonString(body, "ifsc");
+
                 if (pan == null || pan.isBlank()) pan = "ABCDE1234F";
+                if (aadhaar == null || aadhaar.isBlank()) aadhaar = "8912 4019 5821";
+                if (aadhaarMode == null) aadhaarMode = "DIGILOCKER";
                 if (bank == null || bank.isBlank()) bank = "50100482190123";
+                if (ifsc == null || ifsc.isBlank()) ifsc = "HDFC0001234";
 
                 String refId = "CKYC-9042-M";
                 String jsonResponse = String.format(
-                    "{\"status\":\"VERIFIED\",\"kraReference\":\"%s\",\"pan\":\"%s\",\"panStatus\":\"VERIFIED\",\"aadhaarStatus\":\"VERIFIED\",\"pennyDropStatus\":\"SUCCESS\",\"bankAccount\":\"%s\",\"verifiedAt\":\"%s\",\"message\":\"Identity confirmed with CVL-KRA Registry. Penny-drop ₹1.00 successful.\"}",
-                    refId, escapeJson(pan), escapeJson(bank), LocalDateTime.now().format(TIME_FMT)
+                    "{\"status\":\"VERIFIED\",\"kraReference\":\"%s\",\"pan\":\"%s\",\"aadhaar\":\"%s\",\"aadhaarMode\":\"%s\",\"panStatus\":\"VERIFIED\",\"aadhaarStatus\":\"VERIFIED\",\"pennyDropStatus\":\"SUCCESS\",\"bankAccount\":\"%s\",\"ifsc\":\"%s\",\"verifiedAt\":\"%s\",\"message\":\"PAN and Aadhaar (%s) verified with Central KRA. Penny-drop ₹1.00 successful.\"}",
+                    refId, escapeJson(pan), escapeJson(aadhaar), escapeJson(aadhaarMode), escapeJson(bank), escapeJson(ifsc), LocalDateTime.now().format(TIME_FMT), escapeJson(aadhaarMode)
                 );
                 sendResponse(exchange, 200, "application/json", jsonResponse);
             } else {
