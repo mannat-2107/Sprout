@@ -324,3 +324,242 @@
   margin-top: auto;
   padding-top: var(--space-4);
 }
+
+/* Header Profile & Login Controls */
+.header-profile-btn {
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-deep-pine);
+  transition: all var(--transition-fast);
+}
+.header-profile-btn:hover {
+  background: #EBF5EE;
+  border-color: var(--color-primary);
+}
+.header-user-pill {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+/* Interactive KYC Form Inputs */
+.kyc-form-card {
+  background: #FFFFFF;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.kyc-input-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-deep-pine);
+  margin-bottom: 4px;
+}
+.kyc-input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: monospace, var(--font-sans);
+  font-weight: 600;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-xs);
+  background: var(--color-bg-page);
+  color: var(--color-deep-pine);
+  text-transform: uppercase;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.kyc-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(21, 90, 55, 0.12);
+  background: #FFFFFF;
+}
+
+/* Document Upload Dropzone */
+.kyc-upload-dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  margin-top: 6px;
+  border: 1.5px dashed var(--color-border-strong);
+  border-radius: var(--radius-xs);
+  background: #F8FAFC;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  transition: all var(--transition-fast);
+}
+.kyc-upload-dropzone:hover {
+  border-color: var(--color-primary);
+  background: #EBF5EE;
+  color: var(--color-primary);
+}
+.kyc-file-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  margin-top: 6px;
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-radius: var(--radius-xs);
+  font-size: 11px;
+  color: #166534;
+}
+
+/* Modals & Bottom Sheets */
+.modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(14, 40, 28, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.modal-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.modal-sheet {
+  width: 100%;
+  max-height: 90%;
+  background: #FFFFFF;
+  border-radius: 20px 20px 0 0;
+  padding: 20px 18px 24px;
+  overflow-y: auto;
+  box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.15);
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-backdrop.is-open .modal-sheet {
+  transform: translateY(0);
+}
+.modal-handle {
+  width: 36px;
+  height: 4px;
+  background: #CBD5E1;
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+.modal-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.modal-close-btn {
+  background: #F1F5F9;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #475569;
+}
+.modal-close-btn:hover {
+  background: #E2E8F0;
+}
+
+/* OTP 6-Digit Grid */
+.otp-box-grid {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 16px 0;
+}
+.otp-digit-input {
+  width: 44px;
+  height: 48px;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-page);
+  color: var(--color-deep-pine);
+  transition: all var(--transition-fast);
+}
+.otp-digit-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(21, 90, 55, 0.15);
+}
+
+/* Profile Card Rows */
+.profile-stat-card {
+  background: #F8FAFC;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+.profile-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 12px;
+  border-bottom: 1px dashed var(--color-border-subtle);
+}
+.profile-row:last-child {
+  border-bottom: none;
+}
+.profile-row-label {
+  color: var(--color-text-muted);
+}
+.profile-row-val {
+  font-weight: 600;
+  color: var(--color-deep-pine);
+}
+
+/* Toast Notification */
+.app-toast {
+  position: absolute;
+  top: 36px;
+  left: 16px;
+  right: 16px;
+  background: #0E281C;
+  color: #FFFFFF;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 150;
+  transform: translateY(-80px);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  pointer-events: none;
+}
+.app-toast.is-visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+

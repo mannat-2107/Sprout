@@ -11,17 +11,23 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Sprout 2.0 Java Production Server
- * Pure Java (no external frameworks or Python).
- * Serves static web assets and provides REST endpoints for analytics and KYC simulation.
+ * Pure Java HTTP/REST Server.
+ * Serves static assets and provides REST endpoints for Auth, Onboarding, KYC, Orders, and Portfolio.
  */
 public class SproutServer {
 
     private static final int DEFAULT_PORT = 8080;
     private static final Path ROOT_DIR = Paths.get(".").toAbsolutePath().normalize();
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    // In-memory state store for interactive development
+    private static final Map<String, String> OTP_STORE = new ConcurrentHashMap<>();
+    private static final Map<String, Map<String, Object>> SESSIONS = new ConcurrentHashMap<>();
+    private static final Map<String, String> ONBOARDING_STORE = new ConcurrentHashMap<>();
 
     private static final Map<String, String> MIME_TYPES = new HashMap<>();
     static {
@@ -48,29 +54,324 @@ public class SproutServer {
 
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
-        // API Endpoints
-        server.createContext("/api/analytics", new AnalyticsHandler());
+        // Core API Endpoints
+        server.createContext("/api/auth/otp/send", new OtpSendHandler());
+        server.createContext("/api/auth/otp/verify", new OtpVerifyHandler());
+        server.createContext("/api/auth/refresh", new AuthRefreshHandler());
+        server.createContext("/api/auth/logout", new AuthLogoutHandler());
+        server.createContext("/api/onboarding", new OnboardingHandler());
         server.createContext("/api/kyc/verify", new KycVerifyHandler());
         server.createContext("/api/investment/order", new InvestmentOrderHandler());
+        server.createContext("/api/portfolio", new PortfolioHandler());
+        server.createContext("/api/user/profile", new ProfileHandler());
+        server.createContext("/api/analytics", new AnalyticsHandler());
         server.createContext("/api/health", new HealthHandler());
 
-        // Static File Handler
+        // Static Asset Handler
         server.createContext("/", new StaticFileHandler());
 
-        server.setExecutor(null); // Default single-thread or system thread pool
+        server.setExecutor(null);
         server.start();
 
         System.out.println("=================================================");
         System.out.println(" Sprout 2.0 Java Server Started");
         System.out.println(" URL: http://localhost:" + port + "/");
-        System.out.println(" Root Directory: " + ROOT_DIR);
-        System.out.println(" Active API routes: /api/analytics, /api/kyc/verify, /api/investment/order");
-        System.out.println(" Compliance: Risk disclaimer >= 12px enforced");
+        System.out.println(" App: http://localhost:" + port + "/app.html");
+        System.out.println(" API Routes Ready: Auth, KYC, Orders, Portfolio");
         System.out.println("=================================================");
     }
 
+    // ---------- HTTP HANDLERS ----------
+
     /**
-     * Handles static file serving with safe path resolution and correct MIME types
+     * POST /api/auth/otp/send
+     */
+    static class OtpSendHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            enableCors(exchange);
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendResponse(exchange, 405, "application/json", "{\"error\":\"Method not allowed\"}");
+                return;
+            }
+
+            String body = readBody(exchange);
+            String phone = extractJsonString(body, "phone");
+            if (phone == null || phone.isBlank()) {
+                phone = "+919876543210";
+            }
+
+            // Generate 6-digit OTP
+            String otp = "849201"; // Consistent deterministic test OTP for demo
+            OTP_STORE.put(phone, otp);
+
+            System.out.println("[AUTH] Dispatched OTP " + otp + " to phone " + phone);
+            String response = String.format(
+                "{\"status\":\"SENT\",\"phone\":\"%s\",\"demoOtp\":\"%s\",\"message\":\"OTP dispatched successfully (Demo Code: %s)\",\"lockoutSeconds\":0}",
+                escapeJson(phone), otp, otp
+            );
+            sendResponse(exchange, 200, "application/json", response);
+        }
+    }
+
+    /**
+     * POST /api/auth/otp/verify
+     */
+    static class OtpVerifyHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            enableCors(exchange);
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+            if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendResponse(exchange, 405, "application/json", "{\"error\":\"Method not allowed\"}");
+                return;
+            }
+
+            String body = readBody(exchange);
+            String phone = extractJsonString(body, "phone");
+            String otp = extractJsonString(body, "otp");
+
+            if (phone == null || phone.isBlank()) phone = "+919876543210";
+            String expectedOtp = OTP_STORE.getOrDefault(phone, "849201");
+
+            // Allow demo OTP 849201 or 123456 or the stored one
+            if ("849201".equals(otp) || "123456".equals(otp) || expectedOtp.equals(otp)) {
+                String userId = "11111111-1111-1111-1111-111111111111";
+                String accessToken = "sprout_jwt_" + UUID.randomUUID();
+                String refreshToken = "sprout_rt_" + UUID.randomUUID();
+
+                Map<String, Object> session = new HashMap<>();
+                session.put("userId", userId);
+                session.put("phone", phone);
+                session.put("accessToken", accessToken);
+                session.put("refreshToken", refreshToken);
+                SESSIONS.put(accessToken, session);
+
+                String response = String.format(
+                    "{\"status\":\"AUTHENTICATED\",\"accessToken\":\"%s\",\"refreshToken\":\"%s\",\"user\":{\"id\":\"%s\",\"phone\":\"%s\",\"isKycVerified\":true}}",
+                    accessToken, refreshToken, userId, escapeJson(phone)
+                );
+                sendResponse(exchange, 200, "application/json", response);
+            } else {
+                sendResponse(exchange, 400, "application/json", "{\"error\":\"Invalid or expired OTP. Please use code 849201.\"}");
+            }
+        }
+    }
+
+    /**
+     * POST /api/auth/refresh
+     */
+    static class AuthRefreshHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            enableCors(exchange);
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+            String newAccessToken = "sprout_jwt_" + UUID.randomUUID();
+            sendResponse(exchange, 200, "application/json", "{\"accessToken\":\"" + newAccessToken + "\"}");
+        }
+    }
+
+    /**
+     * POST /api/auth/logout
+     */
+    static class AuthLogoutHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            enableCors(exchange);
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+            sendResponse(exchange, 200, "application/json", "{\"status\":\"LOGGED_OUT\",\"message\":\"Session revoked\"}");
+        }
+    }
+
+    /**
+     * GET / POST /api/onboarding
+     */
+    static class OnboardingHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            enableCors(exchange);
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+                String saved = ONBOARDING_STORE.getOrDefault("default", "{\"currentScreen\":1,\"frequency\":\"daily\",\"amount\":100}");
+                sendResponse(exchange, 200, "application/json", saved);
+            } else if ("POST".equalsIgnoreCase(exchange.getRequestMethod()) || "PUT".equalsIgnoreCase(exchange.getRequestMethod())) {
+                String body = readBody(exchange);
+                ONBOARDING_STORE.put("default", body);
+                sendResponse(exchange, 200, "application/json", "{\"status\":\"SAVED\",\"updatedAt\":\"" + LocalDateTime.now().format(TIME_FMT) + "\"}");
+            } else {
+                sendResponse(exchange, 405, "application/json", "{\"error\":\"Method not allowed\"}");
+            }
+        }
+    }
+
+    /**
+     * POST /api/kyc/verify
+     */
+    static class KycVerifyHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            enableCors(exchange);
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                String body = readBody(exchange);
+                String pan = extractJsonString(body, "pan");
+                String bank = extractJsonString(body, "bankAccount");
+                if (pan == null || pan.isBlank()) pan = "ABCDE1234F";
+                if (bank == null || bank.isBlank()) bank = "50100482190123";
+
+                String refId = "CKYC-9042-M";
+                String jsonResponse = String.format(
+                    "{\"status\":\"VERIFIED\",\"kraReference\":\"%s\",\"pan\":\"%s\",\"panStatus\":\"VERIFIED\",\"aadhaarStatus\":\"VERIFIED\",\"pennyDropStatus\":\"SUCCESS\",\"bankAccount\":\"%s\",\"verifiedAt\":\"%s\",\"message\":\"Identity confirmed with CVL-KRA Registry. Penny-drop ₹1.00 successful.\"}",
+                    refId, escapeJson(pan), escapeJson(bank), LocalDateTime.now().format(TIME_FMT)
+                );
+                sendResponse(exchange, 200, "application/json", jsonResponse);
+            } else {
+                sendResponse(exchange, 405, "application/json", "{\"error\":\"Method not allowed\"}");
+            }
+        }
+    }
+
+    /**
+     * POST /api/investment/order
+     */
+    static class InvestmentOrderHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            enableCors(exchange);
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                String body = readBody(exchange);
+                String amount = extractJsonString(body, "amount");
+                String orderId = "SPR-" + (100000 + (int)(Math.random() * 900000));
+                String mandateUrn = "NPCI-MND-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+
+                String jsonResponse = String.format(
+                    "{\"status\":\"SUCCESS\",\"orderId\":\"%s\",\"mandateUrn\":\"%s\",\"scheme\":\"Bandhan Nifty 50 Index Fund\",\"amount\":%s,\"allotmentBusinessDays\":1,\"settlementMode\":\"e-NACH via HDFC Bank\",\"platformFeePaise\":0}",
+                    orderId, mandateUrn, (amount != null && !amount.isBlank()) ? amount : "100"
+                );
+                sendResponse(exchange, 200, "application/json", jsonResponse);
+            } else {
+                sendResponse(exchange, 405, "application/json", "{\"error\":\"Method not allowed\"}");
+            }
+        }
+    }
+
+    /**
+     * GET /api/portfolio
+     */
+    static class PortfolioHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            enableCors(exchange);
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+            String json = "{" +
+                "\"totalInvestedPaise\":10000," +
+                "\"currentValuationPaise\":10020," +
+                "\"activeSipPaise\":10000," +
+                "\"sipFrequency\":\"DAILY\"," +
+                "\"nextDebit\":\"Tomorrow, 09:30 AM\"," +
+                "\"holdings\":[{" +
+                    "\"fundName\":\"Bandhan Nifty 50 Index Fund\"," +
+                    "\"units\":0.3514," +
+                    "\"currentNavPaise\":28450," +
+                    "\"investedPaise\":10000" +
+                "}]" +
+            "}";
+            sendResponse(exchange, 200, "application/json", json);
+        }
+    }
+
+    /**
+     * GET /api/user/profile
+     */
+    static class ProfileHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            enableCors(exchange);
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+            String json = "{" +
+                "\"investorName\":\"Disciplined Investor\"," +
+                "\"phone\":\"+91 98765 43210\"," +
+                "\"ckycReference\":\"CKYC-9042-M\"," +
+                "\"kycStatus\":\"VERIFIED\"," +
+                "\"panMasked\":\"ABCDE••••F\"," +
+                "\"aadhaarMasked\":\"•••• •••• 8912\"," +
+                "\"bankAccountMasked\":\"HDFC Bank •••• 4821\"," +
+                "\"ifsc\":\"HDFC0001234\"," +
+                "\"mandateStatus\":\"ACTIVE_ENACH\"," +
+                "\"amfiRegistration\":\"[ARN-PLACEHOLDER]\"" +
+            "}";
+            sendResponse(exchange, 200, "application/json", json);
+        }
+    }
+
+    /**
+     * POST /api/analytics
+     */
+    static class AnalyticsHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            enableCors(exchange);
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                String body = readBody(exchange);
+                String now = LocalDateTime.now().format(TIME_FMT);
+                System.out.println("[" + now + "] [ANALYTICS] " + body);
+                sendResponse(exchange, 200, "application/json", "{\"status\":\"recorded\",\"timestamp\":\"" + now + "\"}");
+            } else {
+                sendResponse(exchange, 405, "application/json", "{\"error\":\"Method not allowed\"}");
+            }
+        }
+    }
+
+    /**
+     * GET /api/health
+     */
+    static class HealthHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            enableCors(exchange);
+            String json = "{\"status\":\"UP\",\"runtime\":\"Java " + System.getProperty("java.version") + "\",\"app\":\"Sprout 2.0\"}";
+            sendResponse(exchange, 200, "application/json", json);
+        }
+    }
+
+    /**
+     * Handles static file serving
      */
     static class StaticFileHandler implements HttpHandler {
         @Override
@@ -82,7 +383,6 @@ public class SproutServer {
                 pathStr = "/app.html";
             }
 
-            // Sanitize path against directory traversal
             Path resolvedPath = ROOT_DIR.resolve("." + pathStr).normalize();
             if (!resolvedPath.startsWith(ROOT_DIR) || !Files.exists(resolvedPath) || Files.isDirectory(resolvedPath)) {
                 sendResponse(exchange, 404, "text/plain", "404 Not Found: " + pathStr);
@@ -98,7 +398,6 @@ public class SproutServer {
             String contentType = MIME_TYPES.getOrDefault(ext, "application/octet-stream");
             byte[] fileBytes = Files.readAllBytes(resolvedPath);
 
-            // Add standard caching & security headers
             exchange.getResponseHeaders().set("Content-Type", contentType);
             exchange.getResponseHeaders().set("X-Content-Type-Options", "nosniff");
             exchange.getResponseHeaders().set("Cache-Control", "no-cache");
@@ -110,99 +409,37 @@ public class SproutServer {
         }
     }
 
-    /**
-     * Analytics Ingestion Handler
-     */
-    static class AnalyticsHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            enableCors(exchange);
+    // ---------- HELPERS ----------
 
-            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1);
-                return;
-            }
-
-            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-                String now = LocalDateTime.now().format(TIME_FMT);
-                System.out.println("[" + now + "] [ANALYTICS] " + body);
-
-                String jsonResponse = "{\"status\":\"recorded\",\"timestamp\":\"" + now + "\"}";
-                sendResponse(exchange, 200, "application/json", jsonResponse);
-            } else {
-                sendResponse(exchange, 405, "application/json", "{\"error\":\"Method not allowed\"}");
-            }
-        }
+    private static String readBody(HttpExchange exchange) throws IOException {
+        return new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
     }
 
-    /**
-     * Simulated KYC Verification Handler
-     */
-    static class KycVerifyHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            enableCors(exchange);
-
-            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1);
-                return;
-            }
-
-            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                String refId = "KRA-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-                String jsonResponse = String.format(
-                    "{\"status\":\"VERIFIED\",\"kraReference\":\"%s\",\"message\":\"Identity confirmed with CVL-KRA. Penny drop ₹1 successful.\"}",
-                    refId
-                );
-                sendResponse(exchange, 200, "application/json", jsonResponse);
-            } else {
-                sendResponse(exchange, 405, "application/json", "{\"error\":\"Method not allowed\"}");
-            }
+    private static String extractJsonString(String json, String key) {
+        if (json == null) return null;
+        String pattern = "\"" + key + "\"\\s*:\\s*\"([^\"]*)\"";
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile(pattern).matcher(json);
+        if (m.find()) {
+            return m.group(1);
         }
+        // Check for numeric values if string not found
+        String numPattern = "\"" + key + "\"\\s*:\\s*([0-9.]+)";
+        java.util.regex.Matcher m2 = java.util.regex.Pattern.compile(numPattern).matcher(json);
+        if (m2.find()) {
+            return m2.group(1);
+        }
+        return null;
     }
 
-    /**
-     * Simulated Investment Order Handler
-     */
-    static class InvestmentOrderHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            enableCors(exchange);
-
-            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-                exchange.sendResponseHeaders(204, -1);
-                return;
-            }
-
-            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                String orderId = "SPR-" + (100000 + (int)(Math.random() * 900000));
-                String jsonResponse = String.format(
-                    "{\"status\":\"SUCCESS\",\"orderId\":\"%s\",\"scheme\":\"Sprout Nifty 50 Index Basket\",\"amount\":100.00,\"allotmentBusinessDays\":1}",
-                    orderId
-                );
-                sendResponse(exchange, 200, "application/json", jsonResponse);
-            } else {
-                sendResponse(exchange, 405, "application/json", "{\"error\":\"Method not allowed\"}");
-            }
-        }
-    }
-
-    /**
-     * Server Health Handler
-     */
-    static class HealthHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            String json = "{\"status\":\"UP\",\"runtime\":\"Java " + System.getProperty("java.version") + "\",\"app\":\"Sprout 2.0\"}";
-            sendResponse(exchange, 200, "application/json", json);
-        }
+    private static String escapeJson(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     private static void enableCors(HttpExchange exchange) {
         exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
-        exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-        exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
+        exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS");
+        exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type, Authorization, Idempotency-Key");
     }
 
     private static void sendResponse(HttpExchange exchange, int statusCode, String contentType, String content) throws IOException {

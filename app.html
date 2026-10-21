@@ -129,14 +129,16 @@
         <span>4G · VoLTE · 88%</span>
       </div>
 
-      <!-- App Header with AMFI Registration Indicator -->
+      <!-- App Header with AMFI Registration Indicator & Profile Action -->
       <header class="phone-app-header">
-        <a href="index.html" class="phone-back-btn" aria-label="Exit to website">
+        <a href="index.html" class="phone-back-btn" aria-label="Exit to website" title="Exit to Sprout Home">
           <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </a>
-        <!-- COMPLIANCE: Replace [ARN-PLACEHOLDER] with real AMFI ARN -->
-        <span class="phone-header-title">AMFI DISTRIBUTOR • [ARN-PLACEHOLDER]</span>
-        <div style="width: 28px;"></div>
+        <span class="phone-header-title" style="font-size: 11px; letter-spacing: 0.05em;">AMFI • [ARN-PLACEHOLDER]</span>
+        <button id="btn-header-profile" class="header-profile-btn" aria-label="View Profile / Log In">
+          <svg class="icon-svg" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span id="header-user-status" class="header-user-pill">Login</span>
+        </button>
       </header>
 
       <!-- Phone Content Area -->
@@ -379,29 +381,77 @@
 
         <!-- ==================== SCREEN 4: IDENTITY AUTHENTICATION & WAITING ==================== -->
         <div class="ob-screen" id="ob-screen-4">
-          <div class="ob-screen-header" style="margin-bottom: 12px;">
-            <h2 style="font-size: 1.35rem; color: #0E281C;">Identity Authentication</h2>
-            <p style="font-size: 0.8125rem;">Cross-referencing legal credentials with official regulatory registries for institutional compliance.</p>
+          <div class="ob-screen-header" style="margin-bottom: 10px;">
+            <h2 style="font-size: 1.35rem; color: #0E281C;">Identity & Bank Verification</h2>
+            <p style="font-size: 0.8125rem;">Enter credentials for 100% paperless SEBI verification via NSDL & DigiLocker.</p>
           </div>
 
-          <div class="verification-substeps-card">
+          <!-- Interactive KYC Form -->
+          <div class="kyc-form-card" id="kyc-input-section">
+            <div style="margin-bottom: 10px;">
+              <div class="kyc-input-label">
+                <span>1. PERMANENT ACCOUNT NUMBER (PAN)</span>
+                <span id="pan-validation-badge" class="substep-badge badge-green" style="font-size: 10px;">VALID FORMAT</span>
+              </div>
+              <input type="text" id="kyc-pan-input" class="kyc-input" value="ABCDE1234F" maxlength="10" placeholder="ABCDE1234F" autocomplete="off" />
+              
+              <!-- Optional Document Upload / Photo Dropzone -->
+              <label for="kyc-pan-file-input" class="kyc-upload-dropzone" id="kyc-pan-dropzone">
+                <svg class="icon-svg" style="width: 16px; height: 16px; color: #155A37;" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                <span>Upload PAN Card / Photo (Simulate AI OCR)</span>
+                <input type="file" id="kyc-pan-file-input" accept="image/*,.pdf" style="display: none;" />
+              </label>
+              <div id="kyc-upload-success" class="kyc-file-preview" style="display: none;">
+                <span style="display: flex; align-items: center; gap: 6px;">
+                  <svg class="icon-svg" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <strong id="kyc-uploaded-filename">pan_card.jpg</strong>
+                </span>
+                <span class="substep-badge badge-green" style="font-size: 10px;">AI Verified</span>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+              <div class="kyc-input-label">
+                <span>2. AADHAAR DIGILOCKER CONSENT</span>
+                <span class="substep-badge badge-blue" style="font-size: 10px;">UIDAI READY</span>
+              </div>
+              <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 11px; color: #334155; cursor: pointer; background: #F8FAFC; padding: 8px; border-radius: 4px; border: 1px solid #E2E8F0;">
+                <input type="checkbox" id="kyc-digilocker-consent" checked style="margin-top: 2px; accent-color: #155A37;" />
+                <span>Authorize secure DigiLocker XML retrieval linked to mobile phone •••• 8912.</span>
+              </label>
+            </div>
+
+            <div>
+              <div class="kyc-input-label">
+                <span>3. BANK ACCOUNT FOR PENNY-DROP (IMPS)</span>
+                <span id="bank-status-badge" class="substep-badge badge-blue" style="font-size: 10px;">HDFC BANK RESOLVED</span>
+              </div>
+              <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 6px;">
+                <input type="text" id="kyc-bank-acc-input" class="kyc-input" value="50100482190123" placeholder="Account Number" />
+                <input type="text" id="kyc-bank-ifsc-input" class="kyc-input" value="HDFC0001234" placeholder="IFSC Code" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Verification Progress Card -->
+          <div class="verification-substeps-card" style="margin-bottom: 10px;">
             <div class="substep-row">
-              <div class="substep-icon-status substep-status-verified">✓</div>
+              <div class="substep-icon-status substep-status-verified" id="substep-pan-icon">✓</div>
               <div class="substep-info">
                 <div class="substep-header">
-                  <h4>PAN Validation</h4>
-                  <span class="substep-badge badge-green">Verified</span>
+                  <h4>PAN Status</h4>
+                  <span class="substep-badge badge-green" id="substep-pan-badge">Verified</span>
                 </div>
-                <p>PAN: ABCDE1234F verified via NSDL record</p>
+                <p id="substep-pan-text">PAN: ABCDE1234F verified via NSDL record</p>
               </div>
             </div>
 
             <div class="substep-row">
-              <div class="substep-icon-status substep-status-verified">✓</div>
+              <div class="substep-icon-status substep-status-verified" id="substep-aadhaar-icon">✓</div>
               <div class="substep-info">
                 <div class="substep-header">
                   <h4>Aadhaar DigiLocker</h4>
-                  <span class="substep-badge badge-green">Verified</span>
+                  <span class="substep-badge badge-green" id="substep-aadhaar-badge">Verified</span>
                 </div>
                 <p>Linked securely to phone ending in •••• 8912</p>
               </div>
@@ -411,32 +461,33 @@
               <div class="substep-icon-status substep-status-inprogress" id="substep-ckyc-icon"></div>
               <div class="substep-info">
                 <div class="substep-header">
-                  <h4>CKYC & Bank Verification</h4>
-                  <span class="substep-badge badge-blue" id="substep-ckyc-badge">In Progress</span>
+                  <h4>Bank Penny-Drop</h4>
+                  <span class="substep-badge badge-blue" id="substep-ckyc-badge">Ready to Verify</span>
                 </div>
-                <p>Matching account holder legal name against Central Registry records</p>
+                <p id="substep-bank-desc">Deposit ₹1.00 via IMPS to verify legal account holder name</p>
               </div>
             </div>
           </div>
 
-          <div class="gov-repo-card">
+          <!-- Government Repositories Heartbeat Card -->
+          <div class="gov-repo-card" id="kyc-waiting-card">
             <div class="gov-repo-top">
               <div class="gov-bank-icon">
                 <svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 21h18M3 10h18M5 10v11M19 10v11M9 10v11M15 10v11M12 3l9 7H3z"/></svg>
               </div>
               <div class="gov-repo-top-text">
                 <h3>Verifying with Government Repositories</h3>
-                <div class="gov-avg-time">⏱ Average time: 45–90 seconds</div>
+                <div class="gov-avg-time">⏱ Average time: 15–30 seconds</div>
               </div>
             </div>
 
             <div class="registry-exchange-track">
               <div class="exchange-label-row">
-                <span>Registry Exchange</span>
+                <span>Central Registry Exchange</span>
                 <span id="kyc-elapsed-timer">00:00 elapsed</span>
               </div>
               <div class="exchange-progress-bar">
-                <div class="exchange-progress-fill" id="kyc-exchange-fill" style="width: 15%;"></div>
+                <div class="exchange-progress-fill" id="kyc-exchange-fill" style="width: 25%;"></div>
               </div>
               <div class="exchange-milestones">
                 <span class="exchange-milestone is-done">Request Dispatched</span>
@@ -445,13 +496,9 @@
               </div>
             </div>
 
-            <div class="gov-what-we-do">
+            <div class="gov-what-we-do" id="kyc-heartbeat-msg">
               <strong>What we are doing:</strong> Checking your Central KYC Registry (CKYC) status and matching your bank account name via penny-drop confirmation.
             </div>
-
-            <p class="gov-reassurance-note">
-              ℹ Please do not press back or refresh. If it takes longer than 2 minutes, we will safely continue in the background and notify you via SMS.
-            </p>
 
             <div class="gov-ref-tag">
               <span>● 256-bit TLS Gateway Encrypted</span>
@@ -459,21 +506,21 @@
             </div>
           </div>
 
-          <div class="botanical-tier-card" style="background: #F8FAFC; border-color: #E2E8F0;">
-            <div class="botanical-tier-icon" style="background: #E0E7FF; color: #3730A3;">🌱</div>
-            <div class="botanical-tier-info">
-              <h4 style="color: #155A37;">GROWTH MILESTONE 1 OF 4</h4>
-              <p><strong>Seed in Soil:</strong> KYC verification sets your firm foundation for systematic wealth growth.</p>
-            </div>
-          </div>
-
           <div class="ob-bottom-actions">
-            <button class="btn btn-primary btn-block" id="ob-btn-checking-status" style="pointer-events: none;">
+            <!-- Initial Action: Run Verification -->
+            <button class="btn btn-primary btn-block" id="ob-btn-run-verification">
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 0 0 1.946-.806 3.42 3.42 0 0 1 4.438 0 3.42 3.42 0 0 0 1.946.806 3.42 3.42 0 0 1 3.138 3.138 3.42 3.42 0 0 0 .806 1.946 3.42 3.42 0 0 1 0 4.438 3.42 3.42 0 0 0-.806 1.946 3.42 3.42 0 0 1-3.138 3.138 3.42 3.42 0 0 0-1.946.806 3.42 3.42 0 0 1-4.438 0 3.42 3.42 0 0 0-1.946-.806 3.42 3.42 0 0 1-3.138-3.138 3.42 3.42 0 0 0-.806-1.946 3.42 3.42 0 0 1 0-4.438 3.42 3.42 0 0 0 .806-1.946 3.42 3.42 0 0 1 3.138-3.138z"/></svg>
+              <span>Verify Credentials & Run Penny-Drop</span>
+            </button>
+
+            <!-- Spinner State during verification -->
+            <button class="btn btn-primary btn-block" id="ob-btn-checking-status" style="display: none; pointer-events: none;">
               <svg class="icon-svg" style="animation: spin 1s linear infinite;" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg>
-              <span>Checking Status with Registry...</span>
+              <span>Checking Registry & IMPS Rail...</span>
             </button>
             <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
 
+            <!-- Completed State -->
             <div id="kyc-verified-box" style="display: none; margin-bottom: 8px;">
               <button class="btn btn-primary btn-block" id="ob-btn-kyc-proceed">
                 <span>KYC Verified • Proceed to Mandate</span>
@@ -574,6 +621,142 @@
 
       </div>
 
+      <!-- In-App Interactive Toast -->
+      <div id="app-toast" class="app-toast">
+        <svg class="icon-svg" style="width: 16px; height: 16px; color: #86EFAC;" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span id="app-toast-msg">Notification message</span>
+      </div>
+
+      <!-- Phone + OTP Authentication Modal -->
+      <div id="modal-auth" class="modal-backdrop">
+        <div class="modal-sheet">
+          <div class="modal-handle"></div>
+          <div class="modal-header-row">
+            <div>
+              <h3 style="font-size: 1.15rem; color: #0E281C;">Sign In to Sprout</h3>
+              <p style="font-size: 0.75rem; color: #64748B;">Enter your 10-digit mobile number for paperless access.</p>
+            </div>
+            <button id="btn-close-auth-modal" class="modal-close-btn" aria-label="Close">✕</button>
+          </div>
+
+          <!-- Step A: Phone Number -->
+          <div id="auth-step-phone">
+            <label class="kyc-input-label" style="margin-bottom: 6px;">
+              <span>MOBILE NUMBER (INDIAN RESIDENT)</span>
+              <span class="substep-badge badge-blue">OTP LOGIN</span>
+            </label>
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+              <span style="background: #F1F5F9; border: 1px solid #CBD5E1; padding: 10px 12px; border-radius: 4px; font-weight: 700; font-size: 13px; color: #334155;">+91</span>
+              <input type="tel" id="auth-phone-input" class="kyc-input" maxlength="10" value="9876543210" placeholder="9876543210" style="text-transform: none; font-size: 14px;" />
+            </div>
+            <button class="btn btn-primary btn-block" id="btn-send-otp">
+              <span>Send 6-Digit OTP</span>
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+
+          <!-- Step B: OTP Input -->
+          <div id="auth-step-otp" style="display: none;">
+            <p style="font-size: 0.8125rem; color: #334155; text-align: center;">
+              Enter the 6-digit code sent to <strong id="auth-display-phone">+91 98765 43210</strong>
+            </p>
+            <div class="otp-box-grid">
+              <input type="text" maxlength="1" class="otp-digit-input" data-index="0" value="8" />
+              <input type="text" maxlength="1" class="otp-digit-input" data-index="1" value="4" />
+              <input type="text" maxlength="1" class="otp-digit-input" data-index="2" value="9" />
+              <input type="text" maxlength="1" class="otp-digit-input" data-index="3" value="2" />
+              <input type="text" maxlength="1" class="otp-digit-input" data-index="4" value="0" />
+              <input type="text" maxlength="1" class="otp-digit-input" data-index="5" value="1" />
+            </div>
+
+            <div style="text-align: center; margin-bottom: 14px;">
+              <button id="btn-use-demo-otp" style="background: #EBF5EE; border: 1px solid #BBF7D0; color: #15803D; font-size: 11px; padding: 4px 10px; border-radius: 12px; cursor: pointer; font-weight: 600;">
+                💡 Auto-fill Demo Code (849201)
+              </button>
+            </div>
+
+            <button class="btn btn-primary btn-block" id="btn-verify-otp">
+              <span>Verify & Continue</span>
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+            <button id="btn-back-to-phone" class="btn btn-ghost btn-block" style="margin-top: 6px; font-size: 12px;">
+              Change phone number
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Investor Profile & Portfolio Modal -->
+      <div id="modal-profile" class="modal-backdrop">
+        <div class="modal-sheet">
+          <div class="modal-handle"></div>
+          <div class="modal-header-row">
+            <div>
+              <span class="substep-badge badge-green" style="font-size: 10px; margin-bottom: 2px;">SEBI COMPLIANT INVESTOR</span>
+              <h3 style="font-size: 1.2rem; color: #0E281C;">Investor Profile</h3>
+            </div>
+            <button id="btn-close-profile-modal" class="modal-close-btn" aria-label="Close">✕</button>
+          </div>
+
+          <!-- Profile Details Card -->
+          <div class="profile-stat-card">
+            <div class="profile-row">
+              <span class="profile-row-label">Investor Name</span>
+              <span class="profile-row-val" id="profile-name">Disciplined Investor</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-row-label">Registered Phone</span>
+              <span class="profile-row-val" id="profile-phone">+91 98765 43210</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-row-label">CKYC Status</span>
+              <span class="substep-badge badge-green">VERIFIED (CKYC-9042-M)</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-row-label">Linked PAN</span>
+              <span class="profile-row-val" id="profile-pan-val">ABCDE••••F (NSDL Verified)</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-row-label">Auto-Debit Bank</span>
+              <span class="profile-row-val">HDFC Bank ••••4821 (e-NACH Active)</span>
+            </div>
+          </div>
+
+          <!-- Active Portfolio & SIP -->
+          <div style="background: #143525; color: #FFFFFF; padding: 12px 14px; border-radius: var(--radius-sm); margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 11px; text-transform: uppercase; color: #86EFAC; font-weight: 700;">ACTIVE INVESTMENT</span>
+              <span class="substep-badge badge-green" style="font-size: 10px;">DAILY MICRO-SIP</span>
+            </div>
+            <div style="font-size: 1.35rem; font-weight: 700;">₹100 <small style="font-size: 0.8rem; font-weight: normal; opacity: 0.85;">/ day</small></div>
+            <p style="font-size: 11px; color: #A7F3D0; margin-top: 4px;">Bandhan Nifty 50 Index Fund (Direct-Growth). Next debit: Tomorrow at 09:30 AM.</p>
+          </div>
+
+          <!-- Document Locker Downloads -->
+          <h4 style="font-size: 0.85rem; color: #0E281C; margin: 12px 0 6px;">DOCUMENT LOCKER</h4>
+          <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
+            <button class="btn btn-secondary btn-block" id="btn-download-profile-mandate" style="justify-content: space-between; font-size: 12px; padding: 8px 12px;">
+              <span style="display: flex; align-items: center; gap: 6px;">
+                <svg class="icon-svg" style="width: 14px; height: 14px; color: #155A37;" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Mandate Confirmation Slip (PDF)
+              </span>
+              <span style="color: #155A37; font-weight: 700;">Download ↓</span>
+            </button>
+            <button class="btn btn-secondary btn-block" id="btn-download-profile-statement" style="justify-content: space-between; font-size: 12px; padding: 8px 12px;">
+              <span style="display: flex; align-items: center; gap: 6px;">
+                <svg class="icon-svg" style="width: 14px; height: 14px; color: #155A37;" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Statement of Account (CAS)
+              </span>
+              <span style="color: #155A37; font-weight: 700;">Download ↓</span>
+            </button>
+          </div>
+
+          <button id="btn-profile-logout" class="btn btn-ghost btn-block" style="color: #DC2626; font-size: 12px;">
+            Sign Out / Switch Number
+          </button>
+        </div>
+      </div>
+
       <!-- Phone In-App Bottom Compliance Bar -->
       <div class="compliance-disclaimer-strip" style="font-size: 11px; padding: 6px 10px;">
         <span data-i18n="complianceShort">Mutual fund investments are subject to market risks. Read all scheme documents carefully.</span>
@@ -613,8 +796,10 @@
       }
 
       // Initialize Onboarding Flow
-      const onboarding = new window.OnboardingFlow();
-      onboarding.init();
+      if (!window.sproutOnboarding && window.OnboardingFlow) {
+        window.sproutOnboarding = new window.OnboardingFlow();
+        window.sproutOnboarding.init();
+      }
 
       // Language Switcher
       function updateLanguage(lang) {
